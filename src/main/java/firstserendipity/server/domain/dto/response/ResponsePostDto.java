@@ -11,6 +11,7 @@ import static lombok.AccessLevel.*;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 public class ResponsePostDto {
+    private Long id;
     private String title;
     private String content;
     private String image;

@@ -10,6 +10,7 @@ import org.mapstruct.factory.Mappers;
 @Mapper
 public interface PostMapper {
     PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
-    ResponsePostDto toResponseDto(Post post);
-    Post toEntity(RequestPostDto requestPostDto);
+    ResponsePostDto PostEntitytoResponseDto(Post post);
+    Post RequestPostDtotoEntity(RequestPostDto requestPostDto);
+
 }

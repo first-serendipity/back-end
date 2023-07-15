@@ -81,4 +81,20 @@ public class PostService {
         // 객체에 담아 return
         return responsePostDto;
     }
+
+    // 3. 랜덤을 기준으로 게시글 조회
+    public List<ResponsePostDto> getRandomPosts(){
+        List<Post> allPosts = postRepository.findAll();
+        // 셔플 해서 랜덤으로 돌려버리기
+        Collections.shuffle(allPosts);
+        //4개만 뽑아버리기
+        List<Post> randomPosts = allPosts.stream().limit(4).collect(Collectors.toList());
+        // postEntity -> ReponsePostDto 로 return 해주기
+        return randomPosts.stream()
+                .map(INSTANCE::PostEntitytoResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // 4. 좋아요를 기준으로 게시글 조회
+
 }

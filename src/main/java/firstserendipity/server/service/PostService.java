@@ -61,4 +61,24 @@ public class PostService {
                 .toList();
     }
 
+    // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
+    public ResponsePostDto getPost(Long id) {
+
+        // 해당 게시글 찾기
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+
+        // 게시글 정보 & 댓글정보를 담을 DTO 생성
+        ResponsePostDto responsePostDto = ResponsePostDto.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .image(post.getImage())
+                .createdAt(post.getCreatedAt())
+                // 해당 게시글에 해당하는 댓글 찾기
+                .build();
+
+        // 객체에 담아 return
+        return responsePostDto;
+    }
 }

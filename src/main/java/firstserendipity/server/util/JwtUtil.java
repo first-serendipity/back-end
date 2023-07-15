@@ -4,18 +4,19 @@ import firstserendipity.server.domain.role.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+
 import java.security.Key;
 import java.util.Date;
-@Slf4j
 @Component
+@Slf4j
 public class JwtUtil {
-
     private final String HEADER_NAME = "Authorization";
     private final String BEARER = "Bearer ";
     private final String AUTHORIZATION_KEY = "auth";
@@ -42,10 +43,12 @@ public class JwtUtil {
                 .signWith(key, signatureAlgorithm)
                 .compact();
     }
-    //Header에 토큰 추가
-    public void addJwtToHeader(String token, HttpServletResponse response){
-        response.addHeader(HEADER_NAME, token);
-    }
+    // 2. 생성된 JWT를 Response 객체 Header에 바로 넣어버리기!
+
+//    public void addJwtToHeader(String token, HttpServletRequest req){
+//        req.addHeader(HEADER_NAME, token);
+//    }
+
     // 3. Header에 들어있는 JWT 토큰을 Substring
 
     public String substringToken(String tokenValue){
@@ -56,6 +59,7 @@ public class JwtUtil {
         log.error("NOT FOUND TOKEN");
         throw new NullPointerException("NOT FOUND TOKEN");
     }
+
     //    4. JWT 검증
     public boolean validateToken(String token) {
         try {
@@ -74,6 +78,7 @@ public class JwtUtil {
     }
 
     //    5. JWT에서 사용자 정보 가져오기
+
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody(); //body부분의 claims를 가지고 올 수 잇음
     }

@@ -30,4 +30,8 @@ public class Member {
     @Enumerated(STRING)
     private Role role;
 
+    public void encodingPassword(String encodePassword) {
+        this.password = encodePassword;
+    }
+
 }

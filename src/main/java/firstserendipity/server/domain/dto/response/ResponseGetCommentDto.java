@@ -1,10 +1,12 @@
 package firstserendipity.server.domain.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ResponseGetCommentDto {
     private final Long commentId;
     private final String nickname;

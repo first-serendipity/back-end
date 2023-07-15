@@ -3,9 +3,8 @@ package firstserendipity.server.domain.dto.response;
 import lombok.Builder;
 
 @Builder
-public class ResponseWriteCommentDto {
+public class ResponseCommentStatusMessageDto {
 
-    private final Long commentId;
     private final String msg;
 
 

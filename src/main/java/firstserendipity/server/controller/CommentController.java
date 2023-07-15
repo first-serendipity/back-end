@@ -1,14 +1,10 @@
 package firstserendipity.server.controller;
 
 import firstserendipity.server.domain.dto.request.RequestCommentDto;
-import firstserendipity.server.domain.dto.response.ResponseWriteCommentDto;
+import firstserendipity.server.domain.dto.response.ResponseCommentStatusMessageDto;
 import firstserendipity.server.service.CommentService;
-import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.hateoas.Link;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -26,7 +22,7 @@ public class CommentController {
             @RequestBody RequestCommentDto requestCommentDto,
             HttpServletRequest req
     ) {
-        ResponseWriteCommentDto responseWriteCommentDto = commentService.writeComment(id, requestCommentDto, req);
+        ResponseCommentStatusMessageDto responseCommentStatusMessageDto = commentService.writeComment(id, requestCommentDto, req);
         Map<String, Object> response = new HashMap<>();
       //반환 형태  ResponseEntity<Map<String, Object>>
 
@@ -51,9 +47,13 @@ public class CommentController {
 //
 //        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    @GetMapping("/api/comments")
+    @GetMapping("")
     public void getAllMyComments(HttpServletRequest req){
         commentService.getAllMyComments(req);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteComment(@PathVariable Long id, HttpServletRequest req){
+        commentService.deleteComment(id, req);
     }
 }

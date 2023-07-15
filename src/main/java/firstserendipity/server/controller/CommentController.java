@@ -7,6 +7,7 @@ import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,22 +28,32 @@ public class CommentController {
     ) {
         ResponseWriteCommentDto responseWriteCommentDto = commentService.writeComment(id, requestCommentDto, req);
         Map<String, Object> response = new HashMap<>();
-        //ResponseEntity<Map<String, Object>>
-//        List<Link> links = new ArrayList<>();
-//        links.add(Link.of("http://localhost:8080/api/comments/post/" + id, "self"));
-//        links.add(Link.of("http://localhost:8080/api/posts", "getPosts"));
+      //반환 형태  ResponseEntity<Map<String, Object>>
+
+        // _links 정보 추가
+//        List<Map<String, String>> links = new ArrayList<>();
+//        Map<String, String> link1 = new HashMap<>();
+//        link1.put("rel", "self");
+//        link1.put("href", "http://localhost:8080/api/example");
+//        Map<String, String> link2 = new HashMap<>();
+//        link2.put("rel", "getPosts");
+//        link2.put("href", "http://localhost:8080/api/posts");
+//        links.add(link1);
+//        links.add(link2);
+//        response.put("_links", links);
 //
-//        ResponseResource<ResponseWriteCommentDto> responseResource = ResponseResource.
-//                <ResponseWriteCommentDto>builder()
-//                .responseDtos(Collections.singletonList(responseWriteCommentDto))
-//                .build();
+//        // data 정보 추가 (배열 형태)
+//        List<Map<String, String>> data = new ArrayList<>();
+//        Map<String, String> dataItem = new HashMap<>();
+//        dataItem.put("msg", "댓글 작성이 완료되었습니다.");
+//        data.add(dataItem);
+//        response.put("data", data);
 //
-//        responseResource.add(links);
-//          return responseResource;
+//        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-//    @GetMapping("/api/comments")
-//    public void getAllMyComments(HttpServletRequest req){
-//        commentService.getAllMyComments(req);
-//    }
+    @GetMapping("/api/comments")
+    public void getAllMyComments(HttpServletRequest req){
+        commentService.getAllMyComments(req);
+    }
 }

@@ -1,5 +1,6 @@
 package firstserendipity.server.service;
 
+import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.request.RequestCommentDto;
 import firstserendipity.server.domain.dto.response.ResponseWriteCommentDto;
 import firstserendipity.server.domain.entity.Comment;
@@ -12,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static firstserendipity.server.util.mapper.CommentMapper.*;
@@ -26,15 +29,33 @@ public class CommentService {
     public ResponseWriteCommentDto writeComment(Long postId, RequestCommentDto requestCommentDto, HttpServletRequest req) {
         //토큰 검증 후 잘려진 토큰 반환
         String verifiedToken= validateToken(req);
-        //토큰으로 memberId 찾기
+        //토큰으로 멤버 식별자 찾기
         Long memberId = findMemberIdFromToken(verifiedToken);
         //작성된 내용을 entity로 변환
         Comment comment = INSTANCE.commentDtoToCommentEntity(postId, memberId, requestCommentDto);
         //저장
         Comment saveComment = commentRepository.save(comment);
         //저장된 엔티티를 responseDto로 변환해서 return
-        return INSTANCE.commentEntityToCommentDto(saveComment);
+        return INSTANCE.commentEntityToWriteDto(saveComment);
     }
+
+    public List<ResponseGetCommentDto> getAllMyComments(HttpServletRequest req) {
+        //토큰 검증 후 잘려진 토큰 반환
+        String verifiedToken = validateToken(req);
+        //토큰에서 멤버 식별자 찾기
+        Long memberId = findMemberIdFromToken(verifiedToken);
+        //찾아올 댓글을 DTO로 바꿔서 담을 리스트 생성
+        List<ResponseGetCommentDto> commentDtoList= new ArrayList<>();
+        //멤버ID기준으로 댓글 찾아오기
+        List<Comment> comments=commentRepository.findAllByMemberId(memberId);
+        //찾아온 각 댓글을 dto로 변환해서 commentDtoList에 담기.
+        for (Comment comment : comments) {
+            commentDtoList.add(INSTANCE.commentEntityToGetDto(comment));
+        }
+        //DtoList로 반환
+        return commentDtoList;
+            
+        }
     private String validateToken(HttpServletRequest req) {
         String userToken = req.getHeader("Authorization");
         //  jwt 토큰 substring
@@ -61,6 +82,7 @@ public class CommentService {
         // 사용자 정보 가져오기
         return jwtUtil.getUserInfoFromToken(token);
     }
+
 
 
 }

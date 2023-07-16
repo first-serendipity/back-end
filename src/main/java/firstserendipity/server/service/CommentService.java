@@ -9,6 +9,7 @@ import firstserendipity.server.domain.role.Role;
 import firstserendipity.server.repository.CommentRepository;
 import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.util.JwtUtil;
+import firstserendipity.server.util.resource.ResponseResource;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;

@@ -122,7 +122,6 @@ public class PostService {
     // 게시글 수정
     @Transactional
     public ResponsePostDto updatePost(Long id, RequestPostDto requestPostDto, HttpServletRequest req) {
-
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
         // token 가져오기
@@ -139,11 +138,35 @@ public class PostService {
         String role = info.get("auth", String.class);
 
         if (!role.equals("NAYOUNG")) {
-            throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
+            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
         // updatePost
         INSTANCE.updateRequestPostDtotoEntity(requestPostDto,post);
         return INSTANCE.PostEntitytoResponseDto(post);
+    }
+
+
+    public void deletePost(Long id, HttpServletRequest req) {
+        //해당 게시글의 존재 유무 확인
+        Post post = findPost(id);
+        // token 가져오기
+        String tokenValue = req.getHeader("Authorization");
+        //  jwt 토큰 substring
+        String token = jwtUtil.substringToken(tokenValue);
+        // jwt 토큰 검증
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+        }
+        // 사용자 정보 가져오기
+        Claims info = jwtUtil.getUserInfoFromToken(token);
+        // 사용자 권한 가져오기
+        String role = info.get("auth", String.class);
+
+        if (!role.equals("NAYOUNG")) {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
+        //게시글 삭제
+        postRepository.delete(post);
     }
 
     // 게시글 존재유무 확인 메서드

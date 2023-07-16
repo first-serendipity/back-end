@@ -2,12 +2,14 @@ package firstserendipity.server.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Like{

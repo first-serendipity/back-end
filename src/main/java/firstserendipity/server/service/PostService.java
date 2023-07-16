@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class PostService {
 
     private final JwtUtil jwtUtil;
     private final PostRepository postRepository;
+    private final LikeService likeService;
 
     public ResponsePostDto createPost(RequestPostDto requestPostDto, HttpServletRequest req) {
 
@@ -84,7 +86,7 @@ public class PostService {
         return responsePostDto;
     }
 
-    // 3. 랜덤을 기준으로 게시글 조회
+    // 3. 랜덤을 기준으로 게시글 4개 조회
     public List<ResponsePostDto> getRandomPosts(){
         List<Post> allPosts = postRepository.findAll();
         // 셔플 해서 랜덤으로 돌려버리기
@@ -97,6 +99,16 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // 4. 좋아요를 기준으로 게시글 조회
+    // 4. 좋아요를 기준으로 게시글 4개 조회
+    public List<ResponsePostDto> getLikePosts(){
+        List<Post> posts = postRepository.findAll();
+        //좋아요 수를 기준으로 정렬
+        posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
+        // 상위 4개만 게시글을 선택
+        return posts.stream()
+                .limit(4)
+                .map(INSTANCE::PostEntitytoResponseDto)
+                .collect(Collectors.toList());
+    }
 
 }

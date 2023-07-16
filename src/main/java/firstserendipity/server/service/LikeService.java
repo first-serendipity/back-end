@@ -49,4 +49,9 @@ public class LikeService {
 
         return ResponseEntity.ok("좋아요를 등록하였습니다.");
     }
+
+    // postId의 개수가 가장 많은 postId를 찾는다
+    public Long getLikeCountByPostId(Long postId) {
+        return likeRepository.countByPostId(postId);
+    }
 }

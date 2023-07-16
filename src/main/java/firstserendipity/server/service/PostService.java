@@ -5,10 +5,12 @@ import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.entity.Post;
 import firstserendipity.server.repository.PostRepository;
 import firstserendipity.server.util.JwtUtil;
+import firstserendipity.server.util.mapper.PostMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -88,9 +90,7 @@ public class PostService {
 //                .build();
 
         //Mapper 사용
-        ResponsePostDto responsePostDto = INSTANCE.PostEntitytoResponseDto(post);
-        // 객체에 담아 return
-        return responsePostDto;
+        return PostMapper.INSTANCE.PostEntitytoResponseDto(post);
     }
 
     // 3. 랜덤을 기준으로 게시글 4개 조회
@@ -116,6 +116,42 @@ public class PostService {
                 .limit(4)
                 .map(INSTANCE::PostEntitytoResponseDto)
                 .collect(Collectors.toList());
+    }
+
+
+    // 게시글 수정
+    @Transactional
+    public ResponsePostDto updatePost(Long id, RequestPostDto requestPostDto, HttpServletRequest req) {
+
+        //해당 게시글의 존재 유무 확인
+        Post post = findPost(id);
+        // token 가져오기
+        String tokenValue = req.getHeader("Authorization");
+        //  jwt 토큰 substring
+        String token = jwtUtil.substringToken(tokenValue);
+        // jwt 토큰 검증
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+        }
+        // 사용자 정보 가져오기
+        Claims info = jwtUtil.getUserInfoFromToken(token);
+        // 사용자 권한 가져오기
+        String role = info.get("auth", String.class);
+
+        if (!role.equals("NAYOUNG")) {
+            throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
+        }
+        // updatePost
+        INSTANCE.updateRequestPostDtotoEntity(requestPostDto,post);
+        return INSTANCE.PostEntitytoResponseDto(post);
+    }
+
+    // 게시글 존재유무 확인 메서드
+    private Post findPost(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(()->
+                new IllegalArgumentException("존재하지 않는 게시글입니다."));
+
+        return post;
     }
 
 }

@@ -42,7 +42,7 @@ public class PostController {
 
     //선택 게시글 조회
     @GetMapping("/posts/{id}")
-    public ResponsePostDto getPost(@PathVariable Long id){ return postService.getPost(id);}
+    public ResponsePostDto getPost(@PathVariable Long id, HttpServletRequest req){ return postService.getPost(id, req);}
 
     // 추천 게시글 조회
     @GetMapping("/posts/today")

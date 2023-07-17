@@ -38,6 +38,7 @@ public class PostService {
     private final LikeService likeService;
     private final Long FIND_MAX = 4L;
     private final Long RECENT_MAX = 10L;
+    private final Long GOOD_MAX = 9L;
 
     //게시글 생성
     public ResponsePostDto createPost(RequestPostDto requestPostDto, HttpServletRequest req) {
@@ -70,7 +71,7 @@ public class PostService {
         return responsePostDto;
     }
 
-    // 전체 게시글 조회
+    // 1. 전체 게시글 조회
     public List<ResponsePostDto> getPosts() {
         //builder 사용
 //        return postRepository.findAllByOrderByCreatedAtDesc().stream()
@@ -87,8 +88,14 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    // 1-2. 인기 게시글 조회 (9개)
+
+    //좋아요 갯수 count
+    // Long likeCount = likeRepository.countByPostId(id);
+
+
     // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
-    public ResponsePostDto getPost(Long id) {
+    public ResponsePostDto getPost(Long id, HttpServletRequest req) {
         // 해당 게시글 찾기
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
@@ -98,6 +105,19 @@ public class PostService {
         List<ResponseGetCommentDto> commentDtos = comments.stream()
                 .map(COMMENT_INSTANCE::commentEntityToGetDto).toList();
 
+
+        //해당 유저 좋아요 여부
+        // token 가져오기
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        Boolean isLike = false;
+        if(isNotNullTokenValue(tokenValue)){
+            //  jwt 토큰 substring
+            String token = jwtUtil.substringToken(tokenValue);
+            Claims info = jwtUtil.getUserInfoFromToken(token);
+            String loginId=info.getSubject();
+            Long memberId= memberRepository.findByLoginId(loginId).get().getId();
+            isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
+        }
         // Builder 사용
         return ResponsePostDto.builder()
                 .id(post.getId())
@@ -106,10 +126,15 @@ public class PostService {
                 .image(post.getImage())
                 .createdAt(post.getCreatedAt())
                 .comments(commentDtos)
+                .isLike(isLike)
                 .build();
 
         //Mapper 사용
 //        return POST_INSTANCE.PostEntitytoResponseDto(post);
+    }
+
+    private static boolean isNotNullTokenValue(String tokenValue) {
+        return tokenValue != null;
     }
 
     // 3. 랜덤을 기준으로 게시글 4개 조회
@@ -174,11 +199,15 @@ public class PostService {
     // 게시글 수정
     @Transactional
     public ResponsePostDto updatePost(Long id, RequestPostDto requestPostDto, HttpServletRequest req) {
+        String requestTitle = requestPostDto.getTitle();
+        String requestContent = requestPostDto.getContent();
+        String requestImage = requestPostDto.getImage();
+
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
         // token 가져오기
         String tokenValue = jwtUtil.getTokenFromRequest(req);
-        ;
+
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -193,13 +222,9 @@ public class PostService {
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
-        // updatePost
-//        Post postupdate = Post.builder()
-//                .title(requestPostDto.getTitle())
-//                .content(requestPostDto.getContent())
-//                .image(requestPostDto.getImage())
-//                .build();
-        POST_INSTANCE.updateRequestPostDtoToEntity(requestPostDto, post);
+
+        post.updatePost(requestTitle, requestContent, requestImage);
+
         return POST_INSTANCE.postEntityToResponseDto(post);
     }
 
@@ -225,8 +250,9 @@ public class PostService {
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
         }
-        //게시글에 해당하는 댓글 삭제
+        //게시글에 해당하는 댓글 삭제, 좋아요 내역 삭제
         commentRepository.deleteAllByPostId(id);
+        likeRepository.deleteAllByPostId(id);
         //게시글 삭제
         postRepository.delete(post);
     }

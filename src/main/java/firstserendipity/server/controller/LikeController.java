@@ -16,8 +16,8 @@ public class LikeController {
     private final LikeService likeService;
 
     // 리턴값 수정 필요
-    @PostMapping("/like/posts/{id}")
-    public ResponseEntity<String> toggleLike(@PathVariable Long postId, HttpServletRequest req){
-     return likeService.toggleLike(postId,req);
+    @PostMapping("/likes/posts/{id}")
+    public ResponseEntity<String> toggleLike(@PathVariable Long id, HttpServletRequest req){
+     return likeService.toggleLike(id,req);
     }
 }

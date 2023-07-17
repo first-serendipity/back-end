@@ -4,7 +4,9 @@ import firstserendipity.server.domain.dto.request.RequestCommentDto;
 import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.response.ResponseCommentStatusMessageDto;
 import firstserendipity.server.domain.entity.Comment;
+import firstserendipity.server.domain.entity.Post;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -14,5 +16,6 @@ public interface CommentMapper {
 
    ResponseCommentStatusMessageDto commentEntityToWriteDto(Comment comment);
    ResponseGetCommentDto commentEntityToGetDto(Comment comment);
-   Comment commentDtoToCommentEntity(Long postId, Long memberId, RequestCommentDto requestCommentDto);
+   @Mapping(source = "requestCommentDto.content", target = "content")
+   Comment commentDtoToCommentEntity(Post post, Long memberId, RequestCommentDto requestCommentDto);
 }

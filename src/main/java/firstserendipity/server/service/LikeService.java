@@ -38,7 +38,6 @@ public class LikeService {
         // 좋아요 DB 조회 - memberId를 기준으로 postId를 조회
         Optional<Like> findLike = likeRepository.findByMemberIdAndPostId(memberId, postId);
 
-
         // 있다면 삭제
         if (findLike.isPresent()) {
             likeRepository.deleteById(findLike.get().getId());

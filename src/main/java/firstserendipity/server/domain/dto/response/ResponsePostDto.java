@@ -20,5 +20,6 @@ public class ResponsePostDto {
     private String image;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private Boolean isLike;
     private List<ResponseGetCommentDto> comments;
 }

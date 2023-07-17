@@ -2,6 +2,7 @@ package firstserendipity.server.controller;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
+import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -41,19 +42,29 @@ public class PostController {
 
     //선택 게시글 조회
     @GetMapping("/posts/{id}")
-    public ResponsePostDto getPost(@PathVariable Long id){ return postService.getPost(id);}
-
-    // 인기글 게시글 조회
-    @GetMapping("/posts/good")
-    public List<ResponsePostDto> getRandomPosts(){
-        return postService.getPosts();
-    }
+    public ResponsePostDto getPost(@PathVariable Long id, HttpServletRequest req){ return postService.getPost(id, req);}
 
     // 추천 게시글 조회
     @GetMapping("/posts/today")
-    public List<ResponsePostDto> getLikePosts(){
-        return postService.getPosts();
+    public List<ResponsePostListDto> getRandomPosts(){
+        return postService.getRandomPosts();
     }
 
+    // 인기글 게시글 조회
+    @GetMapping("/posts/good")
+    public List<ResponsePostListDto> getLikePosts(){
+        return postService.getLikePosts();
+    }
 
+    // member의 좋아요 리스트 조회
+    @GetMapping("/posts/likes")
+    public List<ResponsePostListDto> memberGetLikePosts(HttpServletRequest req){
+        return postService.memberGetLikePosts(req);
+    }
+
+    // 최근 기록 내역 조회
+    @GetMapping("/post/recent")
+    public List<ResponsePostListDto> getPostByIdRecent(@RequestBody List<Long> postIdList){
+        return postService.getPostByIdRecent(postIdList);
+    }
 }

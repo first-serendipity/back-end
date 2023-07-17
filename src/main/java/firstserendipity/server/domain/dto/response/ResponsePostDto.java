@@ -1,8 +1,11 @@
 package firstserendipity.server.domain.dto.response;
 
+import firstserendipity.server.domain.entity.Comment;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.*;
 
@@ -16,4 +19,7 @@ public class ResponsePostDto {
     private String content;
     private String image;
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private Boolean isLike;
+    private List<ResponseGetCommentDto> comments;
 }

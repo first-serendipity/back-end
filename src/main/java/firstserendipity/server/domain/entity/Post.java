@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.*;
 
@@ -12,40 +13,29 @@ import static lombok.AccessLevel.*;
 @Builder
 @AllArgsConstructor(access = PROTECTED)
 @NoArgsConstructor(access = PROTECTED)
-public class Post extends TimeStamped{
+public class Post extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
     @Column(nullable = false)
     private String title;
 
-    @Column
+    @Column(length = 500)
     private String content;
 
     @Column(nullable = false)
     private String image;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments;
 
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
+    public void updatePost(String title, String content, String image) {
+        this.title = title;
+        this.content = content;
+        this.image = image;
+    }
 
-
-//    //테스트 코드에서 사용
-//    @Builder
-//    public Post(String title, String content, String image) {
-//        super();
-//        this.title = title;
-//        this.content = content;
-//        this.image = image;
-//    }
-//
-//    @PrePersist
-//    public void prePersist() {
-//        createdAt = LocalDateTime.now();
-//        modifiedAt = LocalDateTime.now();
-//    }
 }

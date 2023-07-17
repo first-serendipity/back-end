@@ -20,6 +20,7 @@ import static lombok.AccessLevel.*;
 public class Member {
 
     @Id @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     @NotBlank

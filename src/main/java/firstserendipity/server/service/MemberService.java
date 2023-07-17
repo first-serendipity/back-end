@@ -28,7 +28,7 @@ public class MemberService {
             throw new IllegalArgumentException("중복된 loginId 입니다.");
         }
 
-        Member member = INSTANCE.requestMemberSignupDtoToEntity(requestDto);
+        Member member = MEMBER_INSTANCE.requestMemberSignupDtoToEntity(requestDto);
         member.encodingPassword(encodePassword);
         Member savedMember = memberRepository.save(member);
 

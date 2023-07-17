@@ -32,19 +32,10 @@ public class Post extends Timestamped {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
+    public void updatePost(String title, String content, String image) {
+        this.title = title;
+        this.content = content;
+        this.image = image;
+    }
 
-//    //테스트 코드에서 사용
-//    @Builder
-//    public Post(String title, String content, String image) {
-//        super();
-//        this.title = title;
-//        this.content = content;
-//        this.image = image;
-//    }
-//
-//    @PrePersist
-//    public void prePersist() {
-//        createdAt = LocalDateTime.now();
-//        modifiedAt = LocalDateTime.now();
-//    }
 }

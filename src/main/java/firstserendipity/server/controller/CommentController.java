@@ -51,9 +51,10 @@ public class CommentController {
         Map<String, String> dataItem = new HashMap<>();
         dataItem.put("msg", responseCommentStatusMessageDto.getMsg());
         data.add(dataItem);
-       response.put("data", data);
+        response.put("data", data);
 
         return ResponseEntity.ok().body(response);
+    }
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> getAllMyComments(HttpServletRequest req){
         List<ResponseGetCommentDto> commentDtoList = commentService.getAllMyComments(req);

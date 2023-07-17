@@ -3,17 +3,16 @@ package firstserendipity.server.service;
 import firstserendipity.server.domain.dto.request.RequestPostDto;
 import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
+import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.domain.entity.Comment;
 import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.entity.Post;
-import firstserendipity.server.repository.CommentRepository;
-import firstserendipity.server.repository.LikeRepository;
-import firstserendipity.server.repository.MemberRepository;
-import firstserendipity.server.repository.PostRepository;
+import firstserendipity.server.repository.*;
 import firstserendipity.server.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,19 +21,23 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static firstserendipity.server.util.mapper.CommentMapper.*;
+import static firstserendipity.server.util.mapper.CommentMapper.COMMENT_INSTANCE;
 import static firstserendipity.server.util.mapper.PostMapper.POST_INSTANCE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final JwtUtil jwtUtil;
     private final LikeRepository likeRepository;
+    private final LikeQueryRepository likeQueryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
     private final LikeService likeService;
+    private final Long FIND_MAX = 4L;
+    private final Long RECENT_MAX = 10L;
 
     //게시글 생성
     public ResponsePostDto createPost(RequestPostDto requestPostDto, HttpServletRequest req) {
@@ -52,16 +55,18 @@ public class PostService {
 
         // 사용자 권한 가져오기
         String role = info.get("auth", String.class);
-
+        System.out.println("role = " + role);
+        log.info("role={}", info.get("auth", String.class));
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
         }
         // RequestDto -> Entity
-        Post post = POST_INSTANCE.RequestPostDtotoEntity(requestPostDto);
+        Post post = POST_INSTANCE.requestPostDtoToEntity(requestPostDto);
         // DB 저장
         Post savePost = postRepository.save(post);
+        log.info("post={}", savePost.getCreatedAt());
         // Entity -> ResponseDto
-        ResponsePostDto responsePostDto = POST_INSTANCE.PostEntitytoResponseDto(post);
+        ResponsePostDto responsePostDto = POST_INSTANCE.postEntityToResponseDto(savePost);
         return responsePostDto;
     }
 
@@ -78,7 +83,7 @@ public class PostService {
 //                .toList();
         //Mapper 사용
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(POST_INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::postEntityToResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -108,57 +113,60 @@ public class PostService {
     }
 
     // 3. 랜덤을 기준으로 게시글 4개 조회
-    public List<ResponsePostDto> getRandomPosts(){
+    public List<ResponsePostListDto> getRandomPosts() {
         List<Post> allPosts = postRepository.findAll();
+        log.info("beforePost={}", allPosts);
         // 셔플 해서 랜덤으로 돌려버리기
         Collections.shuffle(allPosts);
+        log.info("afterPost={}", allPosts);
         //4개만 뽑아버리기
-        List<Post> randomPosts = allPosts.stream().limit(4).collect(Collectors.toList());
+        List<Post> randomPosts = allPosts.stream().limit(FIND_MAX).collect(Collectors.toList());
         // postEntity -> ReponsePostDto 로 return 해주기
         return randomPosts.stream()
-                .map(POST_INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
                 .collect(Collectors.toList());
     }
 
     // 4. 좋아요를 기준으로 게시글 4개 조회
-    public List<ResponsePostDto> getLikePosts(){
+    public List<ResponsePostListDto> getLikePosts() {
         List<Post> posts = postRepository.findAll();
         //좋아요 수를 기준으로 정렬
         posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
         // 상위 4개만 게시글을 선택
         return posts.stream()
-                .limit(4)
-                .map(POST_INSTANCE::PostEntitytoResponseDto)
+                .limit(FIND_MAX)
+                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
                 .collect(Collectors.toList());
     }
 
     // 5. Member의 좋아요 리스트를 조회
     // 정렬 기준 - id
-    public List<ResponsePostDto> getLikePosts(Long id, HttpServletRequest req){
+    public List<ResponsePostListDto> memberGetLikePosts(HttpServletRequest req) {
 
-        // 해당 member가 존재하는 확인
-        Member member = findMember(id);
         // token 가져오기
         String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
+
         // jwt 토큰 검증
         if (!jwtUtil.validateToken(token)) {
             throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
         }
         // 사용자 정보 가져오기
         Claims info = jwtUtil.getUserInfoFromToken(token);
-        String memberId = info.getId();
+        String loginId = info.getSubject();
 
-        if(!member.getId().equals(memberId)){
-            throw new IllegalArgumentException("해당 사용자가 아닙니다.");
-        }
+        // 해당 member가 존재하는 확인
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(() ->
+                new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
         //좋아요 리스트 조회
-        List<Post> likePosts = likeRepository.findAllByMemberId(id);
+//        List<Long> likePostsId = likeRepository.findAllPostIdByMemberId(member.getId());
+//        List<Post> likePosts = postRepository.findAllById(member.getId());
+        List<Post> likePosts = likeQueryRepository.findPostsByMemberId(member.getId());
 
         return likePosts.stream()
-                .map(POST_INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
                 .toList();
     }
 
@@ -169,7 +177,8 @@ public class PostService {
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
         // token 가져오기
-        String tokenValue = jwtUtil.getTokenFromRequest(req);;
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        ;
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -190,8 +199,8 @@ public class PostService {
 //                .content(requestPostDto.getContent())
 //                .image(requestPostDto.getImage())
 //                .build();
-        POST_INSTANCE.updateRequestPostDtotoEntity(requestPostDto,post);
-        return POST_INSTANCE.PostEntitytoResponseDto(post);
+        POST_INSTANCE.updateRequestPostDtoToEntity(requestPostDto, post);
+        return POST_INSTANCE.postEntityToResponseDto(post);
     }
 
 
@@ -222,17 +231,20 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    // 게시글 최근 내역 조회 메서드
+    public List<ResponsePostListDto> getPostByIdRecent(List<Long> postIdList) {
+        List<Post> recentList = postRepository.findAllById(postIdList);
+        return recentList.stream()
+                .limit(RECENT_MAX)
+                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .toList();
+    }
 
     // 게시글 존재유무 확인 메서드
     private Post findPost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(()->
+        Post post = postRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 게시글입니다."));
         return post;
     }
 
-    private Member findMember(Long id) {
-        Member member = memberRepository.findById(id).orElseThrow(()->
-                new IllegalArgumentException("존재하지 않는 게시글입니다."));
-        return member;
-    }
 }

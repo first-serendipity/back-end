@@ -5,6 +5,7 @@ import firstserendipity.server.domain.dto.request.RequestMemberLoginDto;
 import firstserendipity.server.domain.role.Role;
 import firstserendipity.server.security.jwt.JwtUserDetailsImpl;
 import firstserendipity.server.util.JwtUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +29,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        setFilterProcessesUrl("/api/members/login");
         log.info("로그인 시도");
         try {
             RequestMemberLoginDto requestDto = objectMapper.readValue(request.getInputStream(), RequestMemberLoginDto.class);

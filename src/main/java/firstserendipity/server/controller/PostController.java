@@ -24,32 +24,33 @@ public class PostController {
         return postService.createPost(requestPostDto,req);
     }
     // 나영님의 게시글 수정
-    @PutMapping("/posts")
+    @PutMapping("/posts/{id}")
     public ResponsePostDto updatePost(@PathVariable Long id, @RequestBody RequestPostDto requestPostDto, HttpServletRequest req) {
         return postService.updatePost(id,requestPostDto,req);
     }
     // 나영님의 게시글 삭제
-    @DeleteMapping("/posts")
+    @DeleteMapping("/posts/{id}")
     public ResponseEntity<String> deletePost(@PathVariable Long id, HttpServletRequest req) {
         postService.deletePost(id,req);
         return ResponseEntity.ok("삭제가 완료되었습니다.");
     }
 
-
     // 전체 게시글 조회
     @GetMapping("/posts")
-    public List<ResponsePostDto> getPosts(){
-        return postService.getPosts();
-    }
+    public List<ResponsePostDto> getPosts(){return postService.getPosts();}
+
+    //선택 게시글 조회
+    @GetMapping("/posts/{id}")
+    public ResponsePostDto getPost(@PathVariable Long id){ return postService.getPost(id);}
 
     // 인기글 게시글 조회
-    @GetMapping("/posts")
+    @GetMapping("/posts/good")
     public List<ResponsePostDto> getRandomPosts(){
         return postService.getPosts();
     }
 
     // 추천 게시글 조회
-    @GetMapping("/posts")
+    @GetMapping("/posts/today")
     public List<ResponsePostDto> getLikePosts(){
         return postService.getPosts();
     }

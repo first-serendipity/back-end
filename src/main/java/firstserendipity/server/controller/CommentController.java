@@ -53,8 +53,7 @@ public class CommentController {
         data.add(dataItem);
        response.put("data", data);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
+        return ResponseEntity.ok().body(response);
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> getAllMyComments(HttpServletRequest req){
         List<ResponseGetCommentDto> commentDtoList = commentService.getAllMyComments(req);
@@ -71,7 +70,7 @@ public class CommentController {
         Map<String, Object> response = new HashMap<>();
         response.put("_links", links);
         response.put("data", commentDtoList);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok().body(response);
     }
 
 
@@ -84,7 +83,7 @@ public class CommentController {
         Link selfLink = WebMvcLinkBuilder.linkTo(CommentController.class).slash(id).withSelfRel();
         links.add(selfLink);
         // getPosts 링크 생성
-        Link getCommentsLink = Link.of("http://localhost:8080/api/comments", "getComments");
+        Link getCommentsLink = WebMvcLinkBuilder.linkTo(CommentController.class).withRel("getComments");
         links.add(getCommentsLink);
 
         // 전체 응답 생성
@@ -97,7 +96,6 @@ public class CommentController {
         dataItem.put("msg", responseCommentStatusMessageDto.getMsg());
         data.add(dataItem);
         response.put("data", data);
-
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.ok().body(response);
     }
 }

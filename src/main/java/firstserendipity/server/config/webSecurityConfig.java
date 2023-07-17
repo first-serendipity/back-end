@@ -31,7 +31,7 @@ public class webSecurityConfig {
                 .authorizeHttpRequests(authorizationRequest -> {
                     authorizationRequest
                             .requestMatchers("/api/members/login", "/api/members/signup").permitAll() //로그인, 회원가입
-                            .requestMatchers(GET, "/aip/posts").permitAll()
+                            .requestMatchers(GET, "/api/posts").permitAll()
                             .requestMatchers(GET, "/api/posts/{id}").permitAll()
                             .requestMatchers("/api/posts/today").permitAll()
                             .requestMatchers("/api/posts/good").permitAll()

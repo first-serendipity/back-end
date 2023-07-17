@@ -2,6 +2,7 @@ package firstserendipity.server.util.mapper;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
+import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.domain.entity.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -11,7 +12,8 @@ import org.mapstruct.factory.Mappers;
 public interface PostMapper {
     PostMapper POST_INSTANCE = Mappers.getMapper(PostMapper.class);
 
-    ResponsePostDto PostEntitytoResponseDto(Post post);
+    ResponsePostDto postEntityToResponseDto(Post post);
+    ResponsePostListDto postEntityToResponseDtoPostList(Post post);
 
 //
 //    default List<String> mapComments(List<Comment> comments) {
@@ -26,7 +28,7 @@ public interface PostMapper {
 //    }
 
 
-    Post RequestPostDtotoEntity(RequestPostDto requestPostDto);
+    Post requestPostDtoToEntity(RequestPostDto requestPostDto);
 
-    Post updateRequestPostDtotoEntity(RequestPostDto requestPostDto, @MappingTarget Post post);
+    Post updateRequestPostDtoToEntity(RequestPostDto requestPostDto, @MappingTarget Post post);
 }

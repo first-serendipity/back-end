@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.*;
 
@@ -32,6 +33,9 @@ public class Post extends TimeStamped{
 
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
+
+    @OneToMany(mappedBy = "postId")
+    private List<Comment> comments;
 
 
 //    //테스트 코드에서 사용

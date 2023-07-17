@@ -9,6 +9,7 @@ import firstserendipity.server.domain.role.Role;
 import firstserendipity.server.repository.CommentRepository;
 import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.util.JwtUtil;
+import firstserendipity.server.util.mapper.CommentMapper;
 import firstserendipity.server.util.resource.ResponseResource;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class CommentService {
         //토큰으로 멤버 식별자 찾기
         Long memberId = findMemberIdFromToken(verifiedToken);
         //작성된 내용을 entity로 변환
-        Comment comment = INSTANCE.commentDtoToCommentEntity(postId, memberId, requestCommentDto);
+        Comment comment = COMMENT_INSTANCE.commentDtoToCommentEntity(postId, memberId, requestCommentDto);
         //저장
         Comment saveComment = commentRepository.save(comment);
         //성공 msg Dto에 담아서 build
@@ -58,7 +59,7 @@ public class CommentService {
         List<Comment> comments = commentRepository.findAllByMemberId(memberId);
         //찾아온 각 댓글을 dto로 변환해서 commentDtoList에 담기.
         for (Comment comment : comments) {
-            commentDtoList.add(INSTANCE.commentEntityToGetDto(comment));
+            commentDtoList.add(COMMENT_INSTANCE.commentEntityToGetDto(comment));
         }
         //DtoList로 반환
         return commentDtoList;
@@ -89,9 +90,9 @@ public class CommentService {
     }
 
     private String validateToken(HttpServletRequest req) {
-        String userToken = req.getHeader("Authorization");
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
-        String substringToken = jwtUtil.substringToken(userToken);
+        String substringToken = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증(필요한가..?)
         if (!jwtUtil.validateToken(substringToken)) {
             throw new IllegalArgumentException("토큰이 유효하지 않습니다.");

@@ -16,7 +16,6 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 public class ResponseResource extends RepresentationModel<ResponseResource> {
-
     @JsonProperty("data")
     private List<?> responseDtos;
 

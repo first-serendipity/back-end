@@ -10,7 +10,8 @@ import org.mapstruct.factory.Mappers;
 @Mapper
 public interface CommentMapper {
 
-   CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
+   CommentMapper COMMENT_INSTANCE = Mappers.getMapper(CommentMapper.class);
+
    ResponseCommentStatusMessageDto commentEntityToWriteDto(Comment comment);
    ResponseGetCommentDto commentEntityToGetDto(Comment comment);
    Comment commentDtoToCommentEntity(Long postId, Long memberId, RequestCommentDto requestCommentDto);

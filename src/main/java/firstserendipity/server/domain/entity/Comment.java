@@ -3,6 +3,7 @@ package firstserendipity.server.domain.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.mapstruct.Mapper;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +24,7 @@ public class Comment extends TimeStamped {
     private String content;
 
     @Column(nullable = false)
-    private Long postId;
+    private String postId;
 
     @Column(nullable = false)
     private Long memberId;

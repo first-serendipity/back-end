@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 @Mapper
 public interface MemberMapper {
 
-    MemberMapper INSTANCE = Mappers.getMapper(MemberMapper.class);
+    MemberMapper MEMBER_INSTANCE = Mappers.getMapper(MemberMapper.class);
 
     @Mapping(target = "role", constant = "MEMBER")
     Member requestMemberSignupDtoToEntity(RequestMemberSignupDto requestDto);

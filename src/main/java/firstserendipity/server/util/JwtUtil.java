@@ -4,6 +4,8 @@ import firstserendipity.server.domain.role.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -42,9 +44,9 @@ public class JwtUtil {
     }
     // 2. 생성된 JWT를 Response 객체 Header에 바로 넣어버리기!
 
-//    public void addJwtToHeader(String token, HttpServletRequest req){
-//        req.addHeader(HEADER_NAME, token);
-//    }
+    public void addJwtToHeader(String token, HttpServletResponse res){
+        res.addHeader(HEADER_NAME, token);
+    }
 
     // 3. Header에 들어있는 JWT 토큰을 Substring
 
@@ -79,4 +81,11 @@ public class JwtUtil {
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody(); //body부분의 claims를 가지고 올 수 잇음
     }
+
+    // 6. JWT HEADER 가져오기
+
+    public String getTokenFromRequest(HttpServletRequest req){
+        return req.getHeader(HEADER_NAME);
+    }
+
 }

@@ -1,17 +1,19 @@
 package firstserendipity.server.service;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
+import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
+import firstserendipity.server.domain.entity.Comment;
 import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.entity.Post;
+import firstserendipity.server.repository.CommentRepository;
+import firstserendipity.server.repository.LikeRepository;
 import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.repository.PostRepository;
 import firstserendipity.server.util.JwtUtil;
-import firstserendipity.server.util.mapper.PostMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,22 +22,25 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static firstserendipity.server.util.mapper.PostMapper.INSTANCE;
+import static firstserendipity.server.util.mapper.CommentMapper.*;
+import static firstserendipity.server.util.mapper.PostMapper.POST_INSTANCE;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final JwtUtil jwtUtil;
+    private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
     private final LikeService likeService;
 
     //게시글 생성
     public ResponsePostDto createPost(RequestPostDto requestPostDto, HttpServletRequest req) {
 
         // token 가져오기
-        String tokenValue = req.getHeader("Authorization");
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -52,11 +57,11 @@ public class PostService {
             throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
         }
         // RequestDto -> Entity
-        Post post = INSTANCE.RequestPostDtotoEntity(requestPostDto);
+        Post post = POST_INSTANCE.RequestPostDtotoEntity(requestPostDto);
         // DB 저장
         Post savePost = postRepository.save(post);
         // Entity -> ResponseDto
-        ResponsePostDto responsePostDto = INSTANCE.PostEntitytoResponseDto(post);
+        ResponsePostDto responsePostDto = POST_INSTANCE.PostEntitytoResponseDto(post);
         return responsePostDto;
     }
 
@@ -73,7 +78,7 @@ public class PostService {
 //                .toList();
         //Mapper 사용
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::PostEntitytoResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -82,20 +87,24 @@ public class PostService {
         // 해당 게시글 찾기
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-        // 게시글 정보 & 댓글정보를 담을 DTO 생성
+
+        // 댓글 조회
+        List<Comment> comments = post.getComments();
+        List<ResponseGetCommentDto> commentDtos = comments.stream()
+                .map(COMMENT_INSTANCE::commentEntityToGetDto).toList();
 
         // Builder 사용
-//        ResponsePostDto responsePostDto = ResponsePostDto.builder()
-//                .id(post.getId())
-//                .title(post.getTitle())
-//                .content(post.getContent())
-//                .image(post.getImage())
-//                .createdAt(post.getCreatedAt())
-//                // 해당 게시글에 해당하는 댓글 찾기
-//                .build();
+        return ResponsePostDto.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .image(post.getImage())
+                .createdAt(post.getCreatedAt())
+                .comments(commentDtos)
+                .build();
 
         //Mapper 사용
-        return INSTANCE.PostEntitytoResponseDto(post);
+//        return POST_INSTANCE.PostEntitytoResponseDto(post);
     }
 
     // 3. 랜덤을 기준으로 게시글 4개 조회
@@ -107,7 +116,7 @@ public class PostService {
         List<Post> randomPosts = allPosts.stream().limit(4).collect(Collectors.toList());
         // postEntity -> ReponsePostDto 로 return 해주기
         return randomPosts.stream()
-                .map(INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::PostEntitytoResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -119,7 +128,7 @@ public class PostService {
         // 상위 4개만 게시글을 선택
         return posts.stream()
                 .limit(4)
-                .map(INSTANCE::PostEntitytoResponseDto)
+                .map(POST_INSTANCE::PostEntitytoResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -130,7 +139,7 @@ public class PostService {
         // 해당 member가 존재하는 확인
         Member member = findMember(id);
         // token 가져오기
-        String tokenValue = req.getHeader("Authorization");
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -139,24 +148,28 @@ public class PostService {
         }
         // 사용자 정보 가져오기
         Claims info = jwtUtil.getUserInfoFromToken(token);
-
         String memberId = info.getId();
+
         if(!member.getId().equals(memberId)){
             throw new IllegalArgumentException("해당 사용자가 아닙니다.");
         }
 
-        return null;
+        //좋아요 리스트 조회
+        List<Post> likePosts = likeRepository.findAllByMemberId(id);
+
+        return likePosts.stream()
+                .map(POST_INSTANCE::PostEntitytoResponseDto)
+                .toList();
     }
 
 
     // 게시글 수정
-
     @Transactional
     public ResponsePostDto updatePost(Long id, RequestPostDto requestPostDto, HttpServletRequest req) {
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
         // token 가져오기
-        String tokenValue = req.getHeader("Authorization");
+        String tokenValue = jwtUtil.getTokenFromRequest(req);;
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -177,11 +190,13 @@ public class PostService {
 //                .content(requestPostDto.getContent())
 //                .image(requestPostDto.getImage())
 //                .build();
-        INSTANCE.updateRequestPostDtotoEntity(requestPostDto,post);
-        return INSTANCE.PostEntitytoResponseDto(post);
+        POST_INSTANCE.updateRequestPostDtotoEntity(requestPostDto,post);
+        return POST_INSTANCE.PostEntitytoResponseDto(post);
     }
-    // 게시글 삭제
 
+
+    // 게시글 삭제
+    @Transactional
     public void deletePost(Long id, HttpServletRequest req) {
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
@@ -202,12 +217,13 @@ public class PostService {
             throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
         }
         //게시글에 해당하는 댓글 삭제
-
+        commentRepository.deleteAllByPostId(id);
         //게시글 삭제
         postRepository.delete(post);
     }
-    // 게시글 존재유무 확인 메서드
 
+
+    // 게시글 존재유무 확인 메서드
     private Post findPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(()->
                 new IllegalArgumentException("존재하지 않는 게시글입니다."));

@@ -9,5 +9,4 @@ public class ResponseCommentStatusMessageDto {
 
     private final String msg;
 
-
 }

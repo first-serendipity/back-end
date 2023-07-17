@@ -1,15 +1,17 @@
 package firstserendipity.server.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+import static lombok.AccessLevel.*;
+
 @Entity
 @Getter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor(access = PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
 public class Post extends TimeStamped{
 
     @Id
@@ -34,12 +36,11 @@ public class Post extends TimeStamped{
 
 //    //테스트 코드에서 사용
 //    @Builder
-//    public Post(String title, String content, String image, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+//    public Post(String title, String content, String image) {
+//        super();
 //        this.title = title;
 //        this.content = content;
 //        this.image = image;
-//        this.createdAt = createdAt;
-//        this.modifiedAt = modifiedAt;
 //    }
 //
 //    @PrePersist

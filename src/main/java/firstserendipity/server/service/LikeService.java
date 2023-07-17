@@ -1,7 +1,9 @@
 package firstserendipity.server.service;
 
 import firstserendipity.server.domain.entity.Like;
+import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.repository.LikeRepository;
+import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +19,11 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
     private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository;
+
     public ResponseEntity<String> toggleLike(Long postId, HttpServletRequest req) {
         // token 가져오기
-        String tokenValue = req.getHeader("Authorization");
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
         String token = jwtUtil.substringToken(tokenValue);
         // jwt 토큰 검증
@@ -28,14 +32,16 @@ public class LikeService {
         }
         // 사용자 정보 가져오기
         Claims info = jwtUtil.getUserInfoFromToken(token);
-        Long memberId = info.get("id", Long.class);
+        Member member = memberRepository.findByLoginId(info.getSubject()).orElseThrow(() -> new IllegalArgumentException("wrong member!!!!!!!"));
+
+        Long memberId = member.getId();
+        // 좋아요 DB 조회 - memberId를 기준으로 postId를 조회
+        Optional<Like> findLike = likeRepository.findByMemberIdAndPostId(memberId, postId);
 
 
-        // 좋아요 DB 조회 - postID, memberId 두개를 기준으로 조회
-        Optional<Like> checklike = likeRepository.existsByMemberIdAndPostId(memberId,postId);
         // 있다면 삭제
-        if(checklike.isPresent()){
-            likeRepository.deleteById(checklike.get().getId());
+        if (findLike.isPresent()) {
+            likeRepository.deleteById(findLike.get().getId());
             return ResponseEntity.ok("좋아요를 삭제하였습니다.");
         }
         // 없다면 등록

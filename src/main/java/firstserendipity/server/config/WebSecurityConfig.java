@@ -47,7 +47,7 @@ public class WebSecurityConfig {
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception{
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, objectMapper);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-
+        filter.setFilterProcessesUrl("/api/members/login");
         return filter;
     }
     @Bean
@@ -69,7 +69,7 @@ public class WebSecurityConfig {
                             .requestMatchers(GET, "/api/posts/{id}").permitAll()
                             .requestMatchers("/api/posts/today").permitAll()
                             .requestMatchers("/api/posts/good").permitAll()
-                            .requestMatchers(POST, "/api/posts").hasRole("NAYOUNG") //게시글 작성
+                            .requestMatchers(POST, "/api/posts").permitAll() //게시글 작성
                             .requestMatchers(PUT, "/api/posts/{id}").hasRole("NAYOUNG") //게시글 수정
                             .requestMatchers(DELETE, "api/posts/{id}").hasRole("NAYOUNG") //게시글 삭제
                             .anyRequest().authenticated();

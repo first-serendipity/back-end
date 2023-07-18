@@ -89,10 +89,13 @@ public class PostService {
     }
 
     // 1-2. 인기 게시글 조회 (9개)
-
-    //좋아요 갯수 count
-    // Long likeCount = likeRepository.countByPostId(id);
-
+    public List<ResponsePostListDto> getGoodPosts() {
+        return postRepository.getAllByOrderByLikeCountDesc().stream()
+                .limit(GOOD_MAX)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
+                .collect(Collectors.toList());
+    }
+    
 
     // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
     public ResponsePostDto getPost(Long id, HttpServletRequest req) {
@@ -148,7 +151,7 @@ public class PostService {
         List<Post> randomPosts = allPosts.stream().limit(FIND_MAX).collect(Collectors.toList());
         // postEntity -> ReponsePostDto 로 return 해주기
         return randomPosts.stream()
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
 
@@ -158,9 +161,10 @@ public class PostService {
         //좋아요 수를 기준으로 정렬
         posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
         // 상위 4개만 게시글을 선택
+
         return posts.stream()
                 .limit(FIND_MAX)
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
 
@@ -191,7 +195,7 @@ public class PostService {
         List<Post> likePosts = likeQueryRepository.findPostsByMemberId(member.getId());
 
         return likePosts.stream()
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .toList();
     }
 

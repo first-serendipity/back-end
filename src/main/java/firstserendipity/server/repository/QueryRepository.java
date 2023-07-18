@@ -15,11 +15,15 @@ public class QueryRepository {
     private final EntityManager em;
 
     public List<Post> findPostsByMemberId(Long memberId) {
-        String query = "select p from Post p join Like l on l.postId = p.id where l.memberId = :memberId";
+        String query = "select p from Post p join Like l on l.post.id = p.id where l.memberId = :memberId";
         TypedQuery<Post> result = em.createQuery(query, Post.class)
                 .setParameter("memberId", memberId);
 
         return result.getResultList();
+    }
+
+    public List<Post> findPostsByLikeCountDesc() {
+        return em.createQuery("select p from Post p order by size(p.likes) DESC").getResultList();
     }
 
 }

@@ -6,6 +6,7 @@ import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,27 +45,59 @@ public class PostController {
     @GetMapping("/posts/{id}")
     public ResponsePostDto getPost(@PathVariable Long id, HttpServletRequest req){ return postService.getPost(id, req);}
 
-    // 추천 게시글 조회
-    @GetMapping("/posts/today")
-    public List<ResponsePostListDto> getRandomPosts(){
-        return postService.getRandomPosts();
+    // 추천 게시글 top 4 조회
+    @GetMapping("/today")
+    public ResponseEntity<ResponseResource> getRandomPosts() {
+        List<ResponsePostListDto> responseDtoList = postService.getRandomPosts();
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responseDtoList)
+                .build();
+
+        WebMvcLinkBuilder PostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(PostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
     }
 
-    // 인기글 게시글 조회
-    @GetMapping("/posts/good")
-    public List<ResponsePostListDto> getLikePosts(){
-        return postService.getLikePosts();
+    // 인기글 게시글 top 4 조회
+    @GetMapping("/good")
+    public ResponseEntity<ResponseResource> getLikePosts() {
+        List<ResponsePostListDto> responseDtoList = postService.getLikePosts();
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responseDtoList)
+                .build();
+
+        WebMvcLinkBuilder PostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(PostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
     }
 
     // member의 좋아요 리스트 조회
-    @GetMapping("/posts/likes")
-    public List<ResponsePostListDto> memberGetLikePosts(HttpServletRequest req){
-        return postService.memberGetLikePosts(req);
+    @GetMapping("/likes")
+    public ResponseEntity<ResponseResource> memberGetLikePosts(HttpServletRequest req){
+        List<ResponsePostListDto> responseDtoList = postService.memberGetLikePosts(req);
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responseDtoList)
+                .build();
+
+        WebMvcLinkBuilder PostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(PostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
     }
 
     // 최근 기록 내역 조회
-    @GetMapping("/post/recent")
-    public List<ResponsePostListDto> getPostByIdRecent(@RequestBody List<Long> postIdList){
-        return postService.getPostByIdRecent(postIdList);
+    @GetMapping("/recent")
+    public ResponseEntity<ResponseResource> getPostByIdRecent(@RequestBody List<Long> postIdList){
+        List<ResponsePostListDto> responseDtoList = postService.getPostByIdRecent(postIdList);
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responseDtoList)
+                .build();
+
+        WebMvcLinkBuilder PostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(PostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
     }
 }

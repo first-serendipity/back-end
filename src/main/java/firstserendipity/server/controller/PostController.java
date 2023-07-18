@@ -1,17 +1,24 @@
 package firstserendipity.server.controller;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.service.PostService;
+import firstserendipity.server.service.S3UploadService;
+import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequiredArgsConstructor

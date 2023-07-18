@@ -14,7 +14,7 @@ public interface CommentMapper {
 
    CommentMapper COMMENT_INSTANCE = Mappers.getMapper(CommentMapper.class);
 
-   ResponseMessageDto commentEntityToWriteDto(Comment comment);
+   ResponseMessageDto commentEntityToWriteDto(String successMessage);
 
    ResponseGetCommentDto commentEntityToGetDto(Comment comment);
    @Mapping(source = "requestCommentDto.content", target = "content")

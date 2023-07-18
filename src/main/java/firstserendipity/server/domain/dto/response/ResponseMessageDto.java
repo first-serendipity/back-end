@@ -13,7 +13,6 @@ import static lombok.AccessLevel.PROTECTED;
 @AllArgsConstructor(access = PROTECTED)
 public class ResponseMessageDto {
 
-    private Long id;
     private String successMessage;
 
 }

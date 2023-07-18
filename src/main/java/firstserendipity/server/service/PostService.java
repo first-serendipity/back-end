@@ -2,6 +2,7 @@ package firstserendipity.server.service;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
 import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.domain.entity.Comment;
@@ -15,10 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static firstserendipity.server.util.mapper.CommentMapper.COMMENT_INSTANCE;
@@ -38,8 +42,9 @@ public class PostService {
     private final LikeService likeService;
     private final S3UploadService s3UploadService;
     private final Long FIND_MAX = 4L;
-    private final Long RECENT_MAX = 10L;
+    private final Long RECENT_MAX = 9L;
     private final Long GOOD_MAX = 9L;
+
 
     //게시글 생성
     public ResponsePostDto createPost(RequestPostDto requestPostDto, MultipartFile image, HttpServletRequest req) throws IOException {
@@ -75,25 +80,16 @@ public class PostService {
     }
 
     // 1. 전체 게시글 조회
-    public List<ResponsePostDto> getPosts() {
-        //builder 사용
-//        return postRepository.findAllByOrderByCreatedAtDesc().stream()
-//                .map(post -> ResponsePostDto.builder()
-//                        .id(post.getId())
-//                        .title(post.getTitle())
-//                        .content(post.getContent())
-//                        .image(post.getImage())
-//                        .build())
-//                .toList();
+    public List<ResponsePostListDto> getPosts() {
         //Mapper 사용
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(POST_INSTANCE::postEntityToResponseDto)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
 
     // 1-2. 인기 게시글 조회 (9개)
-    public List<ResponsePostListDto> getGoodPosts() {
-        return postRepository.getAllByOrderByLikeCountDesc().stream()
+    public List<ResponsePostListDto> getGoodPosts(){
+        return queryRepository.findPostsByLikeCountDesc().stream()
                 .limit(GOOD_MAX)
                 .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
@@ -134,9 +130,6 @@ public class PostService {
                 .comments(commentDtos)
                 .isLike(isLike)
                 .build();
-
-        //Mapper 사용
-//        return POST_INSTANCE.PostEntitytoResponseDto(post);
     }
 
     private static boolean isNotNullTokenValue(String tokenValue) {
@@ -205,7 +198,6 @@ public class PostService {
     public ResponsePostDto updatePost(Long id, RequestPostDto requestPostDto, HttpServletRequest req) {
         String requestTitle = requestPostDto.getTitle();
         String requestContent = requestPostDto.getContent();
-        String requestImage = requestPostDto.getImage();
 
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
@@ -235,7 +227,7 @@ public class PostService {
 
     // 게시글 삭제
     @Transactional
-    public void deletePost(Long id, HttpServletRequest req) {
+    public ResponseMessageDto deletePost(Long id, HttpServletRequest req) {
         //해당 게시글의 존재 유무 확인
         Post post = findPost(id);
         // token 가져오기
@@ -260,6 +252,10 @@ public class PostService {
         likeRepository.deleteAllByPostId(id);
         //게시글 삭제
         postRepository.delete(post);
+
+        return ResponseMessageDto.builder()
+                .successMessage("삭제가 완료되었습니다.")
+                .build();
     }
 
     // 게시글 최근 내역 조회 메서드

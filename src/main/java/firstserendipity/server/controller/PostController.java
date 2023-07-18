@@ -22,39 +22,112 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
+    private final S3UploadService s3UploadService;
+    // 관리자 권한의 게시글 작성 ->
+    @PostMapping
+    public ResponseEntity<ResponseResource> createPost(
+            @RequestPart(value = "image",required = false) MultipartFile image,
+            @RequestPart("data") RequestPostDto requestPostDto,
+            HttpServletRequest req) throws IOException {
+        ResponsePostDto responsePostDto = postService.createPost(requestPostDto,image,req);
+        // ResponseResource 생성
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(Collections.singletonList(responsePostDto))
+                .build();
 
-    // 나영님의 게시글 작성
-    @PostMapping("/posts")
-    public ResponsePostDto createPost(@RequestBody RequestPostDto requestPostDto, HttpServletRequest req) {
-        return postService.createPost(requestPostDto,req);
+        WebMvcLinkBuilder postLinkBuilder = linkTo(PostController.class); //postController에 대한 링크생성
+        //생성된 포스트의 self-link 추가
+        responseResource.add(postLinkBuilder.withSelfRel());
+        //전체 포스트 조회 link 추가
+        responseResource.add(postLinkBuilder.withRel("getPosts"));
+        return ResponseEntity.created(postLinkBuilder.toUri()).body(responseResource);
     }
+
     // 나영님의 게시글 수정
-    @PutMapping("/posts/{id}")
-    public ResponsePostDto updatePost(@PathVariable Long id, @RequestBody RequestPostDto requestPostDto, HttpServletRequest req) {
-        return postService.updatePost(id,requestPostDto,req);
+    //TODO 게시글 수정 시 사진도 수정 가능하게끔
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseResource> updatePost(
+            @PathVariable Long id,
+            @RequestPart("data") RequestPostDto requestPostDto,
+            HttpServletRequest req) {
+
+        ResponsePostDto responsePostDto = postService.updatePost(id, requestPostDto, req);
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(Collections.singletonList(responsePostDto))
+                .build();
+
+        WebMvcLinkBuilder updatePostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(updatePostLinkBuilder.withSelfRel());
+        responseResource.add(updatePostLinkBuilder.withRel("updatePost"));
+
+        return ResponseEntity.ok(responseResource);
     }
+
     // 나영님의 게시글 삭제
-    @DeleteMapping("/posts/{id}")
-    public ResponseEntity<String> deletePost(@PathVariable Long id, HttpServletRequest req) {
-        postService.deletePost(id,req);
-        return ResponseEntity.ok("삭제가 완료되었습니다.");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseResource> deletePost(@PathVariable Long id, HttpServletRequest req) {
+        ResponseMessageDto responseMessageDto = postService.deletePost(id,req);
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(Collections.singletonList(responseMessageDto))
+                .build();
+
+        WebMvcLinkBuilder deletePostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(deletePostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
     }
 
     // 전체 게시글 조회
-    @GetMapping("/posts")
-    public List<ResponsePostDto> getPosts(){return postService.getPosts();}
+    @GetMapping
+    public ResponseEntity<ResponseResource> getPosts() {
+        List<ResponsePostListDto> responsePostDto = postService.getPosts();
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responsePostDto)
+                .build();
+
+        WebMvcLinkBuilder getPostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(getPostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
+    }
+
+    // 인기 게시글 조회
+    @GetMapping("/goodlist")
+    public ResponseEntity<ResponseResource> getGoodPosts(){
+        List<ResponsePostListDto> responsePostDto = postService.getGoodPosts();
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(responsePostDto)
+                .build();
+
+        WebMvcLinkBuilder getPostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(getPostLinkBuilder.withSelfRel());
+
+        return ResponseEntity.ok(responseResource);
+    }
 
     //선택 게시글 조회
-    @GetMapping("/posts/{id}")
-    public ResponsePostDto getPost(@PathVariable Long id, HttpServletRequest req){ return postService.getPost(id, req);}
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseResource> getPost(@PathVariable Long id, HttpServletRequest req){
+        ResponsePostDto responsePostDto = postService.getPost(id, req);
+        ResponseResource responseResource = ResponseResource.builder()
+                .responseDtos(Collections.singletonList(responsePostDto))
+                .build();
+
+        WebMvcLinkBuilder PostLinkBuilder = linkTo(PostController.class);
+        responseResource.add(PostLinkBuilder.withSelfRel());
+        responseResource.add(PostLinkBuilder.slash(id).withRel("updatePost"));
+        responseResource.add(PostLinkBuilder.slash(id).withRel("deletePost"));
+
+        return ResponseEntity.ok(responseResource);
+    }
 
     // 추천 게시글 top 4 조회
     @GetMapping("/today")
-    public ResponseEntity<ResponseResource> getRandomPosts() {
+    public ResponseEntity<ResponseResource> getRandomPosts(){
         List<ResponsePostListDto> responseDtoList = postService.getRandomPosts();
         ResponseResource responseResource = ResponseResource.builder()
                 .responseDtos(responseDtoList)
@@ -68,7 +141,7 @@ public class PostController {
 
     // 인기글 게시글 top 4 조회
     @GetMapping("/good")
-    public ResponseEntity<ResponseResource> getLikePosts() {
+    public ResponseEntity<ResponseResource> getLikePosts(){
         List<ResponsePostListDto> responseDtoList = postService.getLikePosts();
         ResponseResource responseResource = ResponseResource.builder()
                 .responseDtos(responseDtoList)
@@ -107,4 +180,5 @@ public class PostController {
 
         return ResponseEntity.ok(responseResource);
     }
+
 }

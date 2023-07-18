@@ -11,7 +11,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Builder
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
-public class ResponseMemberStatusMessageDto {
+public class ResponseMessageDto {
 
     private Long id;
     private String successMessage;

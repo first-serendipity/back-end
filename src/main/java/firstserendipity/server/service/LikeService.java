@@ -2,6 +2,7 @@ package firstserendipity.server.service;
 
 import firstserendipity.server.domain.entity.Like;
 import firstserendipity.server.domain.entity.Member;
+import firstserendipity.server.domain.entity.Post;
 import firstserendipity.server.repository.LikeRepository;
 import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.util.JwtUtil;

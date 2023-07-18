@@ -192,9 +192,6 @@ public class PostService {
         Member member = memberRepository.findByLoginId(loginId).orElseThrow(() ->
                 new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        //좋아요 리스트 조회
-//        List<Long> likePostsId = likeRepository.findAllPostIdByMemberId(member.getId());
-//        List<Post> likePosts = postRepository.findAllById(member.getId());
         List<Post> likePosts = queryRepository.findPostsByMemberId(member.getId());
 
         return likePosts.stream()
@@ -271,7 +268,7 @@ public class PostService {
                 .map(postId -> postRepository.findById(postId))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
 
         return recentList.stream()
                 .limit(RECENT_MAX)

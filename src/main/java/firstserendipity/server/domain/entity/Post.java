@@ -32,10 +32,16 @@ public class Post extends Timestamped {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
-    public void updatePost(String title, String content, String image) {
+    @OneToMany(mappedBy = "post")
+    private List<Like> likes;
+
+    public Integer getLikeCount(){
+        return likes.size();
+    }
+
+    public void updatePost(String title, String content) {
         this.title = title;
         this.content = content;
-        this.image = image;
     }
 
 }

@@ -35,6 +35,7 @@ public class Post extends Timestamped {
     public void updatePost(String title, String content, String image) {
         this.title = title;
         this.content = content;
+        this.image = image;
     }
 
 }

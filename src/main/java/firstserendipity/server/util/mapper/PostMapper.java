@@ -5,6 +5,7 @@ import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.domain.entity.Post;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
@@ -13,7 +14,9 @@ public interface PostMapper {
     PostMapper POST_INSTANCE = Mappers.getMapper(PostMapper.class);
 
     ResponsePostDto postEntityToResponseDto(Post post);
-    ResponsePostListDto postEntityToResponseDtoPostList(Post post);
+
+    @Mapping(source = "postLikeCount", target = "likeCount")
+    ResponsePostListDto postEntityToResponseDtoPostList(Post post, Integer postLikeCount);
 
 //
 //    default List<String> mapComments(List<Comment> comments) {

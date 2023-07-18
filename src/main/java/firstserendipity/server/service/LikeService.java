@@ -5,6 +5,7 @@ import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.entity.Post;
 import firstserendipity.server.repository.LikeRepository;
 import firstserendipity.server.repository.MemberRepository;
+import firstserendipity.server.repository.PostRepository;
 import firstserendipity.server.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class LikeService {
 
     private final LikeRepository likeRepository;
+    private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
 
@@ -44,6 +46,7 @@ public class LikeService {
             likeRepository.deleteById(findLike.get().getId());
             return ResponseEntity.ok("좋아요를 삭제하였습니다.");
         }
+        Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 게시글이 없습니다."));
         // 없다면 등록
         Like like = Like.builder()
                 .post(post)

@@ -31,7 +31,7 @@ public class PostService {
 
     private final JwtUtil jwtUtil;
     private final LikeRepository likeRepository;
-    private final LikeQueryRepository likeQueryRepository;
+    private final QueryRepository queryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
@@ -95,7 +95,7 @@ public class PostService {
                 .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
-    
+
 
     // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
     public ResponsePostDto getPost(Long id, HttpServletRequest req) {
@@ -192,7 +192,7 @@ public class PostService {
         //좋아요 리스트 조회
 //        List<Long> likePostsId = likeRepository.findAllPostIdByMemberId(member.getId());
 //        List<Post> likePosts = postRepository.findAllById(member.getId());
-        List<Post> likePosts = likeQueryRepository.findPostsByMemberId(member.getId());
+        List<Post> likePosts = queryRepository.findPostsByMemberId(member.getId());
 
         return likePosts.stream()
                 .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))

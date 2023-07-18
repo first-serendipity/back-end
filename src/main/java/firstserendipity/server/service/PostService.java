@@ -31,18 +31,20 @@ public class PostService {
 
     private final JwtUtil jwtUtil;
     private final LikeRepository likeRepository;
-    private final LikeQueryRepository likeQueryRepository;
+    private final QueryRepository queryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
     private final LikeService likeService;
+    private final S3UploadService s3UploadService;
     private final Long FIND_MAX = 4L;
     private final Long RECENT_MAX = 10L;
     private final Long GOOD_MAX = 9L;
 
     //게시글 생성
-    public ResponsePostDto createPost(RequestPostDto requestPostDto, HttpServletRequest req) {
+    public ResponsePostDto createPost(RequestPostDto requestPostDto, MultipartFile image, HttpServletRequest req) throws IOException {
 
+        String imageUrl =  s3UploadService.saveFile(image);
         // token 가져오기
         String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
@@ -61,8 +63,9 @@ public class PostService {
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
         }
+
         // RequestDto -> Entity
-        Post post = POST_INSTANCE.requestPostDtoToEntity(requestPostDto);
+        Post post = POST_INSTANCE.requestPostDtoToEntity(requestPostDto, imageUrl);
         // DB 저장
         Post savePost = postRepository.save(post);
         log.info("post={}", savePost.getCreatedAt());
@@ -89,9 +92,12 @@ public class PostService {
     }
 
     // 1-2. 인기 게시글 조회 (9개)
-
-    //좋아요 갯수 count
-    // Long likeCount = likeRepository.countByPostId(id);
+    public List<ResponsePostListDto> getGoodPosts() {
+        return postRepository.getAllByOrderByLikeCountDesc().stream()
+                .limit(GOOD_MAX)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
+                .collect(Collectors.toList());
+    }
 
 
     // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
@@ -148,7 +154,7 @@ public class PostService {
         List<Post> randomPosts = allPosts.stream().limit(FIND_MAX).collect(Collectors.toList());
         // postEntity -> ReponsePostDto 로 return 해주기
         return randomPosts.stream()
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
 
@@ -158,9 +164,10 @@ public class PostService {
         //좋아요 수를 기준으로 정렬
         posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
         // 상위 4개만 게시글을 선택
+
         return posts.stream()
                 .limit(FIND_MAX)
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
 
@@ -185,13 +192,10 @@ public class PostService {
         Member member = memberRepository.findByLoginId(loginId).orElseThrow(() ->
                 new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        //좋아요 리스트 조회
-//        List<Long> likePostsId = likeRepository.findAllPostIdByMemberId(member.getId());
-//        List<Post> likePosts = postRepository.findAllById(member.getId());
-        List<Post> likePosts = likeQueryRepository.findPostsByMemberId(member.getId());
+        List<Post> likePosts = queryRepository.findPostsByMemberId(member.getId());
 
         return likePosts.stream()
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .toList();
     }
 
@@ -223,7 +227,7 @@ public class PostService {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
 
-        post.updatePost(requestTitle, requestContent, requestImage);
+        post.updatePost(requestTitle, requestContent);
 
         return POST_INSTANCE.postEntityToResponseDto(post);
     }
@@ -250,6 +254,7 @@ public class PostService {
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
         }
+        s3UploadService.deleteImage(post.getImage());
         //게시글에 해당하는 댓글 삭제, 좋아요 내역 삭제
         commentRepository.deleteAllByPostId(id);
         likeRepository.deleteAllByPostId(id);
@@ -259,10 +264,15 @@ public class PostService {
 
     // 게시글 최근 내역 조회 메서드
     public List<ResponsePostListDto> getPostByIdRecent(List<Long> postIdList) {
-        List<Post> recentList = postRepository.findAllById(postIdList);
+        List<Post> recentList = postIdList.stream()
+                .map(postId -> postRepository.findById(postId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
         return recentList.stream()
                 .limit(RECENT_MAX)
-                .map(POST_INSTANCE::postEntityToResponseDtoPostList)
+                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .toList();
     }
 

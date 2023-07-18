@@ -67,9 +67,11 @@ public class WebSecurityConfig {
                             .requestMatchers("/api/members/login", "/api/members/signup").permitAll() //로그인, 회원가입
                             .requestMatchers(GET, "/api/posts").permitAll()
                             .requestMatchers(GET, "/api/posts/{id}").permitAll()
-                            .requestMatchers("/api/posts/today").permitAll()
-                            .requestMatchers("/api/posts/good").permitAll()
-                            .requestMatchers(POST, "/api/posts").permitAll() //게시글 작성
+                            .requestMatchers(GET,"/api/posts/today").permitAll()
+                            .requestMatchers(GET,"/api/posts/good").permitAll()
+                            .requestMatchers(GET,"/api/posts/goodlist").permitAll()
+                            .requestMatchers(GET,"/api/posts/recent").permitAll()
+                            .requestMatchers(POST, "/api/posts").hasRole("NAYOUNG") //게시글 작성
                             .requestMatchers(PUT, "/api/posts/{id}").hasRole("NAYOUNG") //게시글 수정
                             .requestMatchers(DELETE, "api/posts/{id}").hasRole("NAYOUNG") //게시글 삭제
                             .anyRequest().authenticated();

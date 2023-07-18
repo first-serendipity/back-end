@@ -1,7 +1,7 @@
 package firstserendipity.server.controller;
 
 import firstserendipity.server.domain.dto.request.RequestMemberSignupDto;
-import firstserendipity.server.domain.dto.response.ResponseMemberStatusMessageDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.service.MemberService;
 import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.validation.Valid;
@@ -28,9 +28,8 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<ResponseResource> signup(@RequestBody @Valid RequestMemberSignupDto requestDto) {
-        ResponseMemberStatusMessageDto responseDto = memberService.signup(requestDto);
-        Long id = responseDto.getId();
-        ArrayList<ResponseMemberStatusMessageDto> dtos = new ArrayList<>();
+        ResponseMessageDto responseDto = memberService.signup(requestDto);
+        ArrayList<ResponseMessageDto> dtos = new ArrayList<>();
         dtos.add(responseDto);
 
         ResponseResource responseResource = ResponseResource.builder()
@@ -42,7 +41,7 @@ public class MemberController {
         responseResource.add(linkBuilder.slash("signup").withSelfRel());
         responseResource.add(linkBuilder.slash("login").withRel("login"));
 
-        return ResponseEntity.created(linkBuilder.slash(id).toUri()).body(responseResource);
+        return ResponseEntity.created(linkBuilder.slash("signup").toUri()).body(responseResource);
     }
 
 }

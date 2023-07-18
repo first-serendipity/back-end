@@ -14,7 +14,6 @@ import static lombok.AccessLevel.PROTECTED;
 public class RequestPostDto {
     private String title;
     private String content;
-    private String image;
 
 
 }

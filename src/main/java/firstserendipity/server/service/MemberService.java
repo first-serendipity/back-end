@@ -1,7 +1,7 @@
 package firstserendipity.server.service;
 
 import firstserendipity.server.domain.dto.request.RequestMemberSignupDto;
-import firstserendipity.server.domain.dto.response.ResponseMemberStatusMessageDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ResponseMemberStatusMessageDto signup(RequestMemberSignupDto requestDto) {
+    public ResponseMessageDto signup(RequestMemberSignupDto requestDto) {
         String successMessage = "회원가입이 완료되었습니다.";
         String loginId = requestDto.getLoginId();
         String encodePassword = passwordEncoder.encode(requestDto.getPassword());
@@ -30,10 +30,9 @@ public class MemberService {
 
         Member member = MEMBER_INSTANCE.requestMemberSignupDtoToEntity(requestDto);
         member.encodingPassword(encodePassword);
-        Member savedMember = memberRepository.save(member);
+        memberRepository.save(member);
 
-        return ResponseMemberStatusMessageDto.builder()
-                .id(savedMember.getId())
+        return ResponseMessageDto.builder()
                 .successMessage(successMessage)
                 .build();
     }

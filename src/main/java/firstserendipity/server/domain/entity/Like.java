@@ -18,8 +18,9 @@ public class Like{
     @Column(name = "like_id")
     private Long id;
 
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="post_id")
+    private Post post;
 
     @Column(nullable = false)
     private Long memberId;

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class LikeQueryRepository {
+public class QueryRepository {
 
     private final EntityManager em;
 

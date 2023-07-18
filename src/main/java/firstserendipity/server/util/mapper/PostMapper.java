@@ -18,20 +18,5 @@ public interface PostMapper {
     @Mapping(source = "postLikeCount", target = "likeCount")
     ResponsePostListDto postEntityToResponseDtoPostList(Post post, Integer postLikeCount);
 
-//
-//    default List<String> mapComments(List<Comment> comments) {
-//        return comments.stream()
-//                .map(Comment::getContent)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @AfterMapping
-//    default void addCommentsToDto(Post post, @MappingTarget ResponsePostDto.Builder responsePostDtoBuilder) {
-//        responsePostDtoBuilder.comments(mapComments(post.getComments()));
-//    }
-
-
-    Post requestPostDtoToEntity(RequestPostDto requestPostDto);
-
-    Post updateRequestPostDtoToEntity(RequestPostDto requestPostDto, @MappingTarget Post post);
+    Post requestPostDtoToEntity(RequestPostDto requestPostDto, String image);
 }

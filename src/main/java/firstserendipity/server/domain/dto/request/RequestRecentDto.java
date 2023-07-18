@@ -18,5 +18,4 @@ public class RequestRecentDto {
 
     @NotNull
     private List<Long> recentPostList;
-
 }

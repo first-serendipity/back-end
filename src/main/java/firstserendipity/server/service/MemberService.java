@@ -30,7 +30,7 @@ public class MemberService {
 
         Member member = MEMBER_INSTANCE.requestMemberSignupDtoToEntity(requestDto);
         member.encodingPassword(encodePassword);
-        Member savedMember = memberRepository.save(member);
+        memberRepository.save(member);
 
         return ResponseMessageDto.builder()
                 .successMessage(successMessage)

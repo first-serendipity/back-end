@@ -2,19 +2,17 @@ package firstserendipity.server.controller;
 
 import firstserendipity.server.domain.dto.request.RequestCommentDto;
 import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.service.CommentService;
 import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 

@@ -14,7 +14,6 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,10 +45,7 @@ public class CommentService {
         //저장
         commentRepository.save(comment);
         //성공 msg Dto에 담아서 build
-        return ResponseMessageDto.builder()
-                .successMessage(successMsg)
-                .build();
-
+        return COMMENT_INSTANCE.commentEntityToWriteDto(successMessage);
     }
 
     public List<ResponseGetCommentDto> getAllMyComments(HttpServletRequest req) {

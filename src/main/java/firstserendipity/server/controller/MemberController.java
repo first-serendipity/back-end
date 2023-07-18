@@ -41,7 +41,7 @@ public class MemberController {
         responseResource.add(linkBuilder.slash("signup").withSelfRel());
         responseResource.add(linkBuilder.slash("login").withRel("login"));
 
-        return ResponseEntity.created(linkBuilder.slash(id).toUri()).body(responseResource);
+        return ResponseEntity.created(linkBuilder.slash("signup").toUri()).body(responseResource);
     }
 
 }

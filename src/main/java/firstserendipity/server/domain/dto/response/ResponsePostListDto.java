@@ -14,5 +14,6 @@ public class ResponsePostListDto {
     private Long id;
     private String title;
     private String image;
+    private Integer likeCount;
 }
 

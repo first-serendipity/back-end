@@ -2,7 +2,7 @@ package firstserendipity.server.service;
 
 import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.request.RequestCommentDto;
-import firstserendipity.server.domain.dto.response.ResponseCommentStatusMessageDto;
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.domain.entity.Comment;
 import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.entity.Post;
@@ -34,7 +34,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
 
-    public ResponseCommentStatusMessageDto writeComment(Long id, RequestCommentDto requestCommentDto, HttpServletRequest req) {
+    public ResponseMessageDto writeComment(Long id, RequestCommentDto requestCommentDto, HttpServletRequest req) {
         String successMsg = "댓글 작성이 완료되었습니다!";
         //토큰 검증 후 잘려진 토큰 반환
         String verifiedToken = validateToken(req);
@@ -46,8 +46,8 @@ public class CommentService {
         //저장
         Comment saveComment = commentRepository.save(comment);
         //성공 msg Dto에 담아서 build
-        return ResponseCommentStatusMessageDto.builder()
-                .msg(successMsg)
+        return ResponseMessageDto.builder()
+                .successMessage(successMsg)
                 .build();
 
     }
@@ -71,7 +71,7 @@ public class CommentService {
     }
 
     @Transactional
-    public ResponseCommentStatusMessageDto deleteComment(Long id, HttpServletRequest req) {
+    public ResponseMessageDto deleteComment(Long id, HttpServletRequest req) {
         String successMsg = "댓글 삭제가 완료되었습니다!";
         //토큰 검증 후 잘려진 토큰 반환
         String verifiedToken = validateToken(req);
@@ -91,8 +91,8 @@ public class CommentService {
         log.info("requestedMemberId={}",requestedMemberId);
         log.info("writeMemberId={}",writeMemberId);
         commentRepository.deleteById(id);
-        return ResponseCommentStatusMessageDto.builder()
-                .msg(successMsg).build();
+        return ResponseMessageDto.builder()
+                .successMessage(successMsg).build();
     }
 
     private boolean isWriteMemberOrNayoung(Long requestedMemberId, Long writeMemberId, Claims userInfo) {

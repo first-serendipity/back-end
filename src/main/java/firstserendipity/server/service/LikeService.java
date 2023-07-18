@@ -21,7 +21,7 @@ public class LikeService {
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
 
-    public ResponseEntity<String> toggleLike(Long postId, HttpServletRequest req) {
+    public ResponseEntity<String> toggleLike(Long id, HttpServletRequest req) {
         // token 가져오기
         String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
@@ -36,7 +36,7 @@ public class LikeService {
 
         Long memberId = member.getId();
         // 좋아요 DB 조회 - memberId를 기준으로 postId를 조회
-        Optional<Like> findLike = likeRepository.findByMemberIdAndPostId(memberId, postId);
+        Optional<Like> findLike = likeRepository.findByMemberIdAndPostId(memberId, id);
 
         // 있다면 삭제
         if (findLike.isPresent()) {
@@ -45,7 +45,7 @@ public class LikeService {
         }
         // 없다면 등록
         Like like = Like.builder()
-                .postId(postId)
+                .post(post)
                 .memberId(memberId)
                 .build();
 

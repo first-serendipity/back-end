@@ -18,5 +18,6 @@ public interface CommentMapper {
 
    ResponseGetCommentDto commentEntityToGetDto(Comment comment);
    @Mapping(source = "requestCommentDto.content", target = "content")
-   Comment commentDtoToCommentEntity(Post post, Long memberId, RequestCommentDto requestCommentDto);
+   @Mapping(source="id", target = "memberId")
+   Comment commentDtoToCommentEntity(Post post, Long id, String nickname, RequestCommentDto requestCommentDto);
 }

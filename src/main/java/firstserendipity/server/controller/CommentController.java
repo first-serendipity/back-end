@@ -26,9 +26,10 @@ public class CommentController {
     @PostMapping("/posts/{id}")
     public ResponseEntity<ResponseResource> writeComment(
             @PathVariable Long id,
-            @RequestBody RequestCommentDto requestCommentDto,
+            @RequestBody @Valid RequestCommentDto requestCommentDto ,
             HttpServletRequest req
     ) {
+
         ResponseMessageDto responseDto = commentService.writeComment(id, requestCommentDto, req);
         ResponseResource responseResource = ResponseResource.builder()
                 .responseDtos(Collections.singletonList(responseDto))

@@ -23,7 +23,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.http.HttpMethod.*;
-import static org.springframework.security.config.http.SessionCreationPolicy.*;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -46,7 +46,6 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception{
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, objectMapper);
@@ -90,12 +89,13 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
-    private AuthenticationEntryPoint authenticationEntryPoint() { // 토큰 만료시 에러
-        return (request, response, authException) -> {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.getWriter().write("로그인 시간이 만료되었습니다.");
+    private AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authenticationException) -> {
+            String errorMessage = "유효하지 않은 토큰입니다.";
+            response.setStatus(403);
+            response.getWriter().write(errorMessage);
         };
+
     }
     private AccessDeniedHandler accessDeniedHandler() { // 인가 실패시 에러
         return ((request, response, authException) -> {

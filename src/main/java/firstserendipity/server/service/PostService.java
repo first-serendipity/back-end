@@ -41,7 +41,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final LikeService likeService;
     private final S3UploadService s3UploadService;
-    private final Long FIND_MAX = 4L;
+    private final Long FIND_MAX = 1L;
     private final Long RECENT_MAX = 9L;
     private final Long GOOD_MAX = 9L;
 

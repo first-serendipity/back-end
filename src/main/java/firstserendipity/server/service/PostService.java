@@ -120,16 +120,8 @@ public class PostService {
             Long memberId= memberRepository.findByLoginId(loginId).get().getId();
             isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
         }
-        // Builder 사용
-        return ResponsePostDto.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .image(post.getImage())
-                .createdAt(post.getCreatedAt())
-                .comments(commentDtos)
-                .isLike(isLike)
-                .build();
+
+        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike, commentDtos);
     }
 
     private static boolean isNotNullTokenValue(String tokenValue) {

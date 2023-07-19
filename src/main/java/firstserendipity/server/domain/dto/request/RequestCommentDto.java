@@ -1,17 +1,14 @@
 package firstserendipity.server.domain.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)//TIL
 public class RequestCommentDto {
 
     @NotBlank
-    private final String content;
+    private String content;
 
 }

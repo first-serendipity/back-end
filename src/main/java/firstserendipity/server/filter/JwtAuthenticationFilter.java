@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = jwtUtil.createToken(username, role);
 
         jwtUtil.addJwtToHeader(token, response);
-        //TODO 멤버정보를 보내줘야합니다.
+
     }
 
     private static JwtUserDetailsImpl getJwtUserDetailsImpl(Authentication authResult) {
@@ -88,5 +88,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
         response.setStatus(401);
+        response.getWriter().write("아이디 또는 비밀번호가 올바르지 않습니다");
     }
 }

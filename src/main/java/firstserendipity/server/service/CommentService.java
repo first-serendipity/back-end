@@ -35,13 +35,13 @@ public class CommentService {
 
     public ResponseMessageDto writeComment(Long id, RequestCommentDto requestCommentDto, HttpServletRequest req) {
         String successMessage = "댓글 작성이 완료되었습니다!";
-        //토큰 검증 후 잘려진 토큰 반환
         String verifiedToken = validateToken(req);
-        //토큰으로 멤버 식별자 찾기
-        Long memberId = findMemberIdFromToken(verifiedToken);
         Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("wrong post id!!!"));
-        //작성된 내용을 entity로 변환
-        Comment comment = COMMENT_INSTANCE.commentDtoToCommentEntity(post, memberId, requestCommentDto);
+
+        Long memberId = findMemberIdFromToken(verifiedToken);
+        Member member = memberRepository.findById(memberId).orElseThrow(()-> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+
+        Comment comment = COMMENT_INSTANCE.commentDtoToCommentEntity(post, memberId, member.getNickname(), requestCommentDto);
         //저장
         commentRepository.save(comment);
         //성공 msg Dto에 담아서 build
@@ -55,8 +55,8 @@ public class CommentService {
         Long memberId = findMemberIdFromToken(verifiedToken);
 
         List<ResponseGetCommentDto> commentDtoList = new ArrayList<>();
-
         List<Comment> comments = commentRepository.findAllByMemberId(memberId);
+
 
         for (Comment comment : comments) {
             commentDtoList.add(COMMENT_INSTANCE.commentEntityToGetDto(comment));
@@ -90,7 +90,6 @@ public class CommentService {
 
     private boolean isWriteMemberOrNayoung(Long requestedMemberId, Long writeMemberId, Claims userInfo) {
         if (requestedMemberId.equals(writeMemberId)) {
-            log.info("멤버id가 같음");
             return true;
         }
 

@@ -1,6 +1,7 @@
 package firstserendipity.server.util.mapper;
 
 import firstserendipity.server.domain.dto.request.RequestPostDto;
+import firstserendipity.server.domain.dto.response.ResponseGetCommentDto;
 import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.dto.response.ResponsePostListDto;
 import firstserendipity.server.domain.entity.Post;
@@ -19,6 +20,8 @@ public interface PostMapper {
 
     @Mapping(source = "postLikeCount", target = "likeCount")
     ResponsePostListDto postEntityToResponseDtoPostList(Post post, Integer postLikeCount);
+
+    ResponsePostDto postEntityToResponsePostDto(Post post, Boolean isLike, List<ResponseGetCommentDto> comments);
 
     Post requestPostDtoToEntity(RequestPostDto requestPostDto, String image);
 }

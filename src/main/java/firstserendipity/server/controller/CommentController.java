@@ -6,6 +6,7 @@ import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.service.CommentService;
 import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;

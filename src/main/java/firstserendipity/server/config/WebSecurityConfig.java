@@ -17,7 +17,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.http.HttpMethod.*;
@@ -78,11 +80,28 @@ public class WebSecurityConfig {
                             .requestMatchers(DELETE, "api/posts/{id}").hasRole("NAYOUNG") //게시글 삭제
                             .anyRequest().authenticated();
                 })
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(accessDeniedHandler())
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                )
 
                 .addFilterBefore(webConfig.corsFilter(), JwtAuthorizationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    private AuthenticationEntryPoint authenticationEntryPoint() { // 토큰 만료시 에러
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write("로그인 시간이 만료되었습니다.");
+        };
+    }
+    private AccessDeniedHandler accessDeniedHandler() { // 인가 실패시 에러
+        return ((request, response, authException) -> {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().write("Access Denied");
+        });
     }
 
     private static void stateless(SessionManagementConfigurer<HttpSecurity> SessionManagementConfigurer) {

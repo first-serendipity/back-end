@@ -128,7 +128,7 @@ public class PostService {
         return tokenValue != null;
     }
 
-    // 3. 랜덤을 기준으로 게시글 4개 조회
+    // 3. 랜덤을 기준으로 게시글 1개 조회
     public List<ResponsePostListDto> getRandomPosts() {
         List<Post> allPosts = postRepository.findAll();
         log.info("beforePost={}", allPosts);
@@ -143,7 +143,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // 4. 좋아요를 기준으로 게시글 4개 조회
+    // 4. 좋아요를 기준으로 게시글 1개 조회
     public List<ResponsePostListDto> getLikePosts() {
         List<Post> posts = postRepository.findAll();
         //좋아요 수를 기준으로 정렬

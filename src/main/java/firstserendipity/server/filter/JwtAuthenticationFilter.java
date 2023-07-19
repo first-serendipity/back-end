@@ -58,6 +58,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = jwtUtil.createToken(username, role);
 
         jwtUtil.addJwtToHeader(token, response);
+        //TODO 멤버정보를 보내줘야합니다.
     }
 
     private static JwtUserDetailsImpl getJwtUserDetailsImpl(Authentication authResult) {

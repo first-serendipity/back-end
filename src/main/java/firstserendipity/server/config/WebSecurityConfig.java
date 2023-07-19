@@ -85,7 +85,7 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint())
                 )
 
-                .addFilterBefore(webConfig.corsFilter(), JwtAuthorizationFilter.class)
+                .addFilter(webConfig.corsFilter())
                 .addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -8,6 +8,7 @@ import firstserendipity.server.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +32,7 @@ public class WebSecurityConfig {
     private final JwtUserDetailsServiceImpl jwtUserDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ObjectMapper objectMapper;
+    private final WebConfig webConfig;
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -76,6 +78,8 @@ public class WebSecurityConfig {
                             .requestMatchers(DELETE, "api/posts/{id}").hasRole("NAYOUNG") //게시글 삭제
                             .anyRequest().authenticated();
                 })
+
+                .addFilterBefore(webConfig.corsFilter(), JwtAuthorizationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();

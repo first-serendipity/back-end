@@ -97,8 +97,8 @@ public class WebSecurityConfig {
         };
 
     }
-    private AccessDeniedHandler accessDeniedHandler() { // 인가 실패시 에러
-        return ((request, response, authException) -> {
+    private AccessDeniedHandler accessDeniedHandler() {
+        return ((request, response, accessDeniedException) -> {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.getWriter().write("Access Denied");
         });

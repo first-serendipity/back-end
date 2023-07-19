@@ -10,8 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class RequestCommentDto {
-    @NotBlank
-    private final String nickname;
 
     @NotBlank
     private final String content;

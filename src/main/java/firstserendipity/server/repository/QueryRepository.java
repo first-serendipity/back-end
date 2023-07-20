@@ -1,5 +1,6 @@
 package firstserendipity.server.repository;
 
+import firstserendipity.server.domain.dto.response.ResponsePostDto;
 import firstserendipity.server.domain.entity.Post;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

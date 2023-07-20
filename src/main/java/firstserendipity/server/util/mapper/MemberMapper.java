@@ -1,6 +1,7 @@
 package firstserendipity.server.util.mapper;
 
 import firstserendipity.server.domain.dto.request.RequestMemberSignupDto;
+import firstserendipity.server.domain.dto.response.ResponseMemberDto;
 import firstserendipity.server.domain.entity.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,5 +14,7 @@ public interface MemberMapper {
 
     @Mapping(target = "role", constant = "MEMBER")
     Member requestMemberSignupDtoToEntity(RequestMemberSignupDto requestDto);
+
+    ResponseMemberDto MemberEntityToResponseMemberDto(Member member);
 
 }

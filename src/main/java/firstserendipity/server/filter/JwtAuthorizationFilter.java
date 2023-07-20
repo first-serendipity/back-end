@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             String token = jwtUtil.substringToken(tokenValue);
             if (!jwtUtil.validateToken(token)) {
                 log.error("Token error");
-                return;
+                throw new AccessDeniedException("유효하지 않은 토큰입니다.");
             }
             Claims info = jwtUtil.getUserInfoFromToken(token);
 

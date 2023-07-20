@@ -1,5 +1,6 @@
 package firstserendipity.server.controller;
 
+import firstserendipity.server.domain.dto.request.RequestCommentDto;
 import firstserendipity.server.domain.dto.request.RequestMemberSignupDto;
 import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.service.MemberService;

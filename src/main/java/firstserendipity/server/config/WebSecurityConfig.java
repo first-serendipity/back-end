@@ -8,6 +8,7 @@ import firstserendipity.server.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +17,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.http.HttpMethod.*;
-import static org.springframework.security.config.http.SessionCreationPolicy.*;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +34,7 @@ public class WebSecurityConfig {
     private final JwtUserDetailsServiceImpl jwtUserDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ObjectMapper objectMapper;
+    private final WebConfig webConfig;
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -42,7 +46,6 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception{
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, objectMapper);
@@ -76,9 +79,29 @@ public class WebSecurityConfig {
                             .requestMatchers(DELETE, "api/posts/{id}").hasRole("NAYOUNG") //게시글 삭제
                             .anyRequest().authenticated();
                 })
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(accessDeniedHandler())
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                )
+
+                .addFilter(webConfig.corsFilter())
                 .addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+    private AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authenticationException) -> {
+            String errorMessage = "유효하지 않은 토큰입니다.";
+            response.setStatus(403);
+            response.getWriter().write(errorMessage);
+        };
+
+    }
+    private AccessDeniedHandler accessDeniedHandler() {
+        return ((request, response, accessDeniedException) -> {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.getWriter().write("Access Denied");
+        });
     }
 
     private static void stateless(SessionManagementConfigurer<HttpSecurity> SessionManagementConfigurer) {

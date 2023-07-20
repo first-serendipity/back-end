@@ -6,6 +6,7 @@ import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.service.CommentService;
 import firstserendipity.server.util.resource.ResponseResource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +27,10 @@ public class CommentController {
     @PostMapping("/posts/{id}")
     public ResponseEntity<ResponseResource> writeComment(
             @PathVariable Long id,
-            @RequestBody RequestCommentDto requestCommentDto,
+            @RequestBody @Valid RequestCommentDto requestCommentDto ,
             HttpServletRequest req
     ) {
+
         ResponseMessageDto responseDto = commentService.writeComment(id, requestCommentDto, req);
         ResponseResource responseResource = ResponseResource.builder()
                 .responseDtos(Collections.singletonList(responseDto))

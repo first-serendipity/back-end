@@ -41,7 +41,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final LikeService likeService;
     private final S3UploadService s3UploadService;
-    private final Long FIND_MAX = 4L;
+    private final Long FIND_MAX = 1L;
     private final Long RECENT_MAX = 9L;
     private final Long GOOD_MAX = 9L;
 
@@ -106,7 +106,7 @@ public class PostService {
         List<Comment> comments = post.getComments();
         List<ResponseGetCommentDto> commentDtos = comments.stream()
                 .map(COMMENT_INSTANCE::commentEntityToGetDto).toList();
-
+        Integer likeCount = post.getLikeCount();
 
         //해당 유저 좋아요 여부
         // token 가져오기
@@ -120,23 +120,15 @@ public class PostService {
             Long memberId= memberRepository.findByLoginId(loginId).get().getId();
             isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
         }
-        // Builder 사용
-        return ResponsePostDto.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .image(post.getImage())
-                .createdAt(post.getCreatedAt())
-                .comments(commentDtos)
-                .isLike(isLike)
-                .build();
+
+        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike,likeCount, commentDtos);
     }
 
     private static boolean isNotNullTokenValue(String tokenValue) {
         return tokenValue != null;
     }
 
-    // 3. 랜덤을 기준으로 게시글 4개 조회
+    // 3. 랜덤을 기준으로 게시글 1개 조회
     public List<ResponsePostListDto> getRandomPosts() {
         List<Post> allPosts = postRepository.findAll();
         log.info("beforePost={}", allPosts);
@@ -151,7 +143,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // 4. 좋아요를 기준으로 게시글 4개 조회
+    // 4. 좋아요를 기준으로 게시글 1개 조회
     public List<ResponsePostListDto> getLikePosts() {
         List<Post> posts = postRepository.findAll();
         //좋아요 수를 기준으로 정렬

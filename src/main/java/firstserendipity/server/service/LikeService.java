@@ -1,5 +1,6 @@
 package firstserendipity.server.service;
 
+import firstserendipity.server.domain.dto.response.ResponseMessageDto;
 import firstserendipity.server.domain.entity.Like;
 import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.entity.Post;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -23,8 +25,10 @@ public class LikeService {
     private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
-
-    public ResponseEntity<String> toggleLike(Long id, HttpServletRequest req) {
+    @Transactional
+    public ResponseMessageDto toggleLike(Long id, HttpServletRequest req) {
+        String likeMessage = "좋아요를 등록하였습니다.";
+        String unlikeMessage = "좋아요를 취소하였습니다.";
         // token 가져오기
         String tokenValue = jwtUtil.getTokenFromRequest(req);
         //  jwt 토큰 substring
@@ -44,7 +48,9 @@ public class LikeService {
         // 있다면 삭제
         if (findLike.isPresent()) {
             likeRepository.deleteById(findLike.get().getId());
-            return ResponseEntity.ok("좋아요를 삭제하였습니다.");
+            return ResponseMessageDto.builder()
+                    .successMessage(unlikeMessage)
+                    .build();
         }
         Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 게시글이 없습니다."));
         // 없다면 등록
@@ -56,7 +62,9 @@ public class LikeService {
         // 등록 후 저장
         likeRepository.save(like);
 
-        return ResponseEntity.ok("좋아요를 등록하였습니다.");
+        return ResponseMessageDto.builder()
+                .successMessage(likeMessage)
+                .build();
     }
 
     // postId의 개수가 가장 많은 postId를 찾는다

@@ -2,6 +2,7 @@ package firstserendipity.server.repository;
 
 import firstserendipity.server.domain.entity.Post;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

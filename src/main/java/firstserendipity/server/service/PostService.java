@@ -66,7 +66,7 @@ public class PostService {
             throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
         }
         // RequestDto -> Entity
-        Post post = POST_INSTANCE.requestPostDtoToEntity(requestPostDto, imageUrl);
+        Post post = POST_INSTANCE.test(requestPostDto, imageUrl);
         // DB 저장
         Post savePost = postRepository.save(post);
         Boolean isLike = false;
@@ -212,6 +212,14 @@ public class PostService {
 
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
+        }
+
+        Boolean isLike = false;
+        if(isNotNullTokenValue(tokenValue)){
+            //  jwt 토큰 substring
+            String loginId=info.getSubject();
+            Long memberId= memberRepository.findByLoginId(loginId).get().getId();
+            isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
         }
 
         post.updatePost(requestTitle, requestContent);

@@ -22,5 +22,6 @@ public class ResponsePostDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private Boolean isLike;
+    private Integer likeCount;
     private List<ResponseGetCommentDto> comments;
 }

@@ -106,7 +106,7 @@ public class PostService {
         List<Comment> comments = post.getComments();
         List<ResponseGetCommentDto> commentDtos = comments.stream()
                 .map(COMMENT_INSTANCE::commentEntityToGetDto).toList();
-
+        Integer likeCount = post.getLikeCount();
 
         //해당 유저 좋아요 여부
         // token 가져오기
@@ -121,7 +121,7 @@ public class PostService {
             isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
         }
 
-        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike, commentDtos);
+        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike,likeCount, commentDtos);
     }
 
     private static boolean isNotNullTokenValue(String tokenValue) {

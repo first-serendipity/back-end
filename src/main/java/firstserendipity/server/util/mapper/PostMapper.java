@@ -21,7 +21,7 @@ public interface PostMapper {
     @Mapping(source = "postLikeCount", target = "likeCount")
     ResponsePostListDto postEntityToResponseDtoPostList(Post post, Integer postLikeCount);
 
-    ResponsePostDto postEntityToResponsePostDto(Post post, Boolean isLike, List<ResponseGetCommentDto> comments);
+    ResponsePostDto postEntityToResponsePostDto(Post post, Boolean isLike, Integer likeCount, List<ResponseGetCommentDto> comments);
 
     Post requestPostDtoToEntity(RequestPostDto requestPostDto, String image);
 }

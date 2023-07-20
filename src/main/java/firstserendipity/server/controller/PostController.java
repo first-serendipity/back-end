@@ -139,10 +139,10 @@ public class PostController {
         return ResponseEntity.ok(responseResource);
     }
 
-    // 인기글 게시글 top 4 조회
+    // 인기글 게시글 top 1 조회
     @GetMapping("/good")
-    public ResponseEntity<ResponseResource> getLikePosts(){
-        List<ResponsePostListDto> responseDtoList = postService.getLikePosts();
+    public ResponseEntity<ResponseResource> getBestPost(){
+        List<ResponsePostListDto> responseDtoList = postService.getBestPost();
         ResponseResource responseResource = ResponseResource.builder()
                 .responseDtos(responseDtoList)
                 .build();

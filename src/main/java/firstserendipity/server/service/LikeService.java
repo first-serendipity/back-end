@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class LikeService {
     private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
-
+    @Transactional
     public ResponseMessageDto toggleLike(Long id, HttpServletRequest req) {
         String likeMessage = "좋아요를 등록하였습니다.";
         String unlikeMessage = "좋아요를 취소하였습니다.";

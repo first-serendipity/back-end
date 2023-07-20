@@ -80,7 +80,7 @@ public class PostService {
     // 1. 전체 게시글 조회
     public List<ResponsePostListDto> getPosts() {
         //Mapper 사용
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
+        return queryRepository.findAllPostsCreatedAtDesc().stream()
                 .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
@@ -97,9 +97,9 @@ public class PostService {
     // 2. 선택 게시글 조회 +) 선택한 게시글에 해당하는 댓글까지 모두 조회
     public ResponsePostDto getPost(Long id, HttpServletRequest req) {
         // 해당 게시글 찾기
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-
+        Post post = queryRepository.findPostWithComments(id);
+//        Long likeCount = queryRepository.findLikeCount(id);
+        Long likeCount = likeRepository.countByPostId(id);
         // 댓글 조회
         List<Comment> comments = post.getComments();
         List<ResponseGetCommentDto> commentDtos = comments.stream()

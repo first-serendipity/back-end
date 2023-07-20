@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static firstserendipity.server.util.mapper.CommentMapper.COMMENT_INSTANCE;
@@ -68,14 +65,15 @@ public class PostService {
         if (!role.equals("NAYOUNG")) {
             throw new IllegalArgumentException("작성자만 등록할 수 있습니다.");
         }
-
         // RequestDto -> Entity
         Post post = POST_INSTANCE.requestPostDtoToEntity(requestPostDto, imageUrl);
         // DB 저장
         Post savePost = postRepository.save(post);
+        Boolean isLike = false;
+
         log.info("post={}", savePost.getCreatedAt());
         // Entity -> ResponseDto
-        ResponsePostDto responsePostDto = POST_INSTANCE.postEntityToResponseDto(savePost);
+        ResponsePostDto responsePostDto = POST_INSTANCE.postEntityToResponseDto(savePost, savePost.getLikeCount(), isLike);
         return responsePostDto;
     }
 
@@ -87,7 +85,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // 1-2. 인기 게시글 조회 (9개)
+    // 1-2. 인기 게시글 내림차순 조회
     public List<ResponsePostListDto> getGoodPosts(){
         return queryRepository.findPostsByLikeCountDesc().stream()
                 .limit(GOOD_MAX)
@@ -106,7 +104,6 @@ public class PostService {
         List<Comment> comments = post.getComments();
         List<ResponseGetCommentDto> commentDtos = comments.stream()
                 .map(COMMENT_INSTANCE::commentEntityToGetDto).toList();
-        Integer likeCount = post.getLikeCount();
 
         //해당 유저 좋아요 여부
         // token 가져오기
@@ -121,7 +118,7 @@ public class PostService {
             isLike = likeRepository.existsByMemberIdAndPostId(memberId, id);
         }
 
-        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike,likeCount, commentDtos);
+        return POST_INSTANCE.postEntityToResponsePostDto(post, isLike, likeCount, commentDtos);
     }
 
     private static boolean isNotNullTokenValue(String tokenValue) {
@@ -144,17 +141,23 @@ public class PostService {
     }
 
     // 4. 좋아요를 기준으로 게시글 1개 조회
-    public List<ResponsePostListDto> getLikePosts() {
-        List<Post> posts = postRepository.findAll();
-        //좋아요 수를 기준으로 정렬
-        posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
-        // 상위 4개만 게시글을 선택
-
-        return posts.stream()
+    public List<ResponsePostListDto> getBestPost() {
+        return queryRepository.findPostsByLikeCountDesc().stream()
                 .limit(FIND_MAX)
                 .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
                 .collect(Collectors.toList());
     }
+
+//        List<Post> posts = postRepository.findAll();
+//        //좋아요 수를 기준으로 정렬
+//        posts.sort(Comparator.comparingLong(post -> likeService.getLikeCountByPostId(post.getId())));
+//        // 상위 4개만 게시글을 선택
+//
+//        return posts.stream()
+//                .limit(FIND_MAX)
+//                .map(post -> POST_INSTANCE.postEntityToResponseDtoPostList(post, post.getLikeCount()))
+//                .collect(Collectors.toList());
+//    }
 
     // 5. Member의 좋아요 리스트를 조회
     // 정렬 기준 - id
@@ -213,7 +216,7 @@ public class PostService {
 
         post.updatePost(requestTitle, requestContent);
 
-        return POST_INSTANCE.postEntityToResponseDto(post);
+        return POST_INSTANCE.postEntityToResponseDto(post, post.getLikeCount(), isLike);
     }
 
 

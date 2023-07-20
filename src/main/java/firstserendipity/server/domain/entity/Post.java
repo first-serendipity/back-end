@@ -36,9 +36,8 @@ public class Post extends Timestamped {
 
     @OneToMany(mappedBy = "post")
     private List<Like> likes;
-
-    public Integer getLikeCount(){
-        return likes.size();
+    public Long getLikeCount() {
+        return (long) likes.size();
     }
 
     public void updatePost(String title, String content) {

@@ -1,12 +1,14 @@
 package firstserendipity.server.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static lombok.AccessLevel.*;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
@@ -34,9 +36,8 @@ public class Post extends Timestamped {
 
     @OneToMany(mappedBy = "post")
     private List<Like> likes;
-
-    public Integer getLikeCount(){
-        return likes.size();
+    public Long getLikeCount() {
+        return (long) likes.size();
     }
 
     public void updatePost(String title, String content) {

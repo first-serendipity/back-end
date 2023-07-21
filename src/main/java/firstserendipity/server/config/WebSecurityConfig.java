@@ -91,16 +91,14 @@ public class WebSecurityConfig {
     }
     private AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authenticationException) -> {
-            String errorMessage = "유효하지 않은 토큰입니다.";
-            response.setStatus(403);
-            response.getWriter().write(errorMessage);
+            response.getWriter().write(authenticationException.getMessage());
         };
 
     }
     private AccessDeniedHandler accessDeniedHandler() {
         return ((request, response, accessDeniedException) -> {
             response.setStatus(HttpStatus.FORBIDDEN.value());
-            response.getWriter().write("Access Denied");
+            response.getWriter().write(accessDeniedException.getMessage());
         });
     }
 

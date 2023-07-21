@@ -7,9 +7,7 @@ import firstserendipity.server.domain.entity.Member;
 import firstserendipity.server.domain.role.Role;
 import firstserendipity.server.repository.MemberRepository;
 import firstserendipity.server.security.jwt.JwtUserDetailsImpl;
-import firstserendipity.server.service.MemberService;
 import firstserendipity.server.util.JwtUtil;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +25,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static firstserendipity.server.util.mapper.MemberMapper.*;
+import static firstserendipity.server.util.mapper.MemberMapper.MEMBER_INSTANCE;
+
 @Slf4j(topic = "로그인 및 JWT 생성")
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -36,7 +35,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final ObjectMapper objectMapper;
     @Autowired
     private MemberRepository memberRepository;
-
 
 
     @Override
@@ -66,7 +64,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("로그인 성공 및 JWT 생성");
         String username = getJwtUserDetailsImpl(authResult).getUsername();
         Role role = getJwtUserDetailsImpl(authResult).getMember().getRole();
-        Member member = memberRepository.findByLoginId(username).orElseThrow(()->new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+        Member member = memberRepository.findByLoginId(username).orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
         ResponseMemberDto responseDto = MEMBER_INSTANCE.MemberEntityToResponseMemberDto(member);
         Map<String, ResponseMemberDto> map = new HashMap<>();
 
@@ -91,3 +89,4 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.getWriter().write("아이디 또는 비밀번호가 올바르지 않습니다");
     }
 }
+
